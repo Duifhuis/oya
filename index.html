@@ -46,6 +46,13 @@ h2 { font-size: 1.2rem; color: var(--zeed); }
 .lijnweken { list-style: none; margin: 0; padding: 0; position: relative; }
 .lijnweken::before { content: ""; position: absolute; left: 31px; top: 30px; bottom: 30px; width: 4px; background: var(--lijn2); border-radius: 2px; }
 .lijnweken li { position: relative; margin: 0 0 10px; }
+.lijnweken.tm::before { background: var(--zee); }
+/* t/m-stand: "t/m" klein in de halte zelf, zodat de rij niet hoger wordt */
+.ring span.tm { display: flex; flex-direction: column; line-height: 1; gap: 1px; }
+.ring span.tm small { font-size: .6rem; font-weight: 700; letter-spacing: .02em; }
+.bereik { display: grid; gap: 6px; }
+.bereik .seg button { min-height: 44px; }
+@media (max-width: 520px) { .bereiktip { min-height: 3em; } } /* smal scherm: tip altijd twee regels hoog, zodat de lijst niet verspringt */
 .halte { width: 100%; display: flex; align-items: center; gap: 14px; background: var(--kaart); border: 1px solid var(--lijn);
   border-radius: 14px; padding: 10px 14px 10px 6px; cursor: pointer; text-align: left; }
 .halte:disabled { cursor: default; background: var(--bg); }
@@ -960,6 +967,19 @@ function dagenDezeWeek() {
 /* SESSIES                                                              */
 /* ================================================================== */
 function schud(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i+1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function rangschik(pool) {
+  const t = vandaag();
+  return pool.map(q => { const r = S.q[q.id]; const laag = !r ? 2 : (r.due <= t ? 3 : 1); return { q, k: laag * 10 + Math.random() * 3 }; })
+    .sort((a, b) => b.k - a.k).map(x => x.q);
+}
+/* Tot en met: helft uit de gekozen week, helft uit eerdere weken (om en om), zodat het nieuwe onderwerp niet wegvalt
+   achter herhaling en eerdere onderwerpen wel door elkaar terugkomen (interleaving). */
+function heeftEerder(week) { return Q.some(q => q.w < week); }
+function wachtrijTm(week) {
+  const a = rangschik(Q.filter(q => q.w === week)), b = rangschik(Q.filter(q => q.w < week)); const uit = [];
+  while (a.length || b.length) { if (a.length) uit.push(a.shift()); if (b.length) uit.push(b.shift()); }
+  return uit;
+}
 function wachtrij(week) {
   const t = vandaag();
   const pool = week ? Q.filter(q => q.w === week) : Q;
@@ -982,7 +1002,7 @@ const LT = "ABCDEFGH";
 
 function thuis() {
   document.body.classList.remove("klas");
-  const dw = dagenDezeWeek(), wd = weekdoel();
+  const dw = dagenDezeWeek(), wd = weekdoel(); const tm = S.inst.bereik === "tm"; const eerste = WEKEN[0].n;
   let h = `<div class="top"><div><h1>Ọya</h1><div class="sub"><span class="muted">Begripstrainer Elektriciteit</span>
       <button class="info" id="info" aria-expanded="${infoOpen}" aria-label="Over de naam Ọya">i</button></div></div>
     <div class="doel" aria-label="Weekdoel: ${dw} van ${wd} dagen geoefend"><div class="small muted">Weekdoel</div>
@@ -991,12 +1011,15 @@ function thuis() {
   ${infoOpen ? `<div class="infotekst">Ọya is in de Yoruba-traditie (Nigeria) de orisha van wind, bliksem en storm, en beschermster van de rivier de Niger. Ze wordt ook vereerd in onder meer Candomblé (als Iansã) en Santería. Bliksem is een enorme elektrische ontlading: vandaar de naam van deze begripstrainer.</div>` : ""}
   <div class="rij"><button class="btn btn-primair" id="mix">Oefenen, alle weken · ${lengte()}</button></div>
   <div class="rij"><button class="btn btn-stil" id="inst">⚙ Instellingen</button><button class="btn btn-stil" id="klasknop">Klasmodus (beamer)</button></div>
-  <div class="small muted">Of kies een week:</div>
-  <ol class="lijnweken" aria-label="Lesweken">`;
+  <div class="bereik"><div class="small muted" id="bereiklabel">Of kies een week. Oefen dan:</div>
+    <div class="seg" role="group" aria-labelledby="bereiklabel"><button id="balleen" aria-pressed="${!tm}">Alleen die week</button><button id="btm" aria-pressed="${tm}">Tot en met die week</button></div>
+    <div class="small muted bereiktip">${tm ? "Vragen uit die week en eerdere weken door elkaar: goed om te herhalen." : "Nieuw onderwerp? Oefen eerst alleen die week. Wil je herhalen, kies dan ‘tot en met’."}</div></div>
+  <ol class="lijnweken${tm ? " tm" : ""}" aria-label="Lesweken">`;
   WEKEN.forEach(w => {
     const st = weekStats(w.n); const leegw = st.totaal === 0; const pct = Math.round(st.beheersing * 100);
-    h += `<li><button class="halte" data-w="${w.n}" ${leegw ? "disabled" : ""} aria-label="Week ${w.n}: ${esc(w.naam)}${leegw ? ", volgt nog" : ", " + niveau(st)}">
-      <span class="ring" style="background:conic-gradient(var(--zee) ${pct}%, var(--lijn) 0)"><span>${w.n}</span></span>
+    const tmHier = tm && !leegw && heeftEerder(w.n);
+    h += `<li><button class="halte" data-w="${w.n}" ${leegw ? "disabled" : ""} aria-label="${tmHier ? "Oefen week " + eerste + " tot en met " + w.n + ". " : ""}Week ${w.n}: ${esc(w.naam)}${leegw ? ", volgt nog" : ", " + niveau(st)}">
+      <span class="ring" style="background:conic-gradient(var(--zee) ${pct}%, var(--lijn) 0)"><span${tmHier ? ' class="tm"' : ""}>${tmHier ? '<small>t/m</small>' : ""}${w.n}</span></span>
       <span><span class="hnaam">${esc(w.naam)}</span><br><span class="hsub">${esc(w.sub)}${leegw ? " · volgt nog" : " · " + niveau(st)}</span></span>
       <span class="hrechts">${leegw ? "" : `<b>${st.gezien}</b>beantwoord`}</span></button></li>`;
   });
@@ -1007,7 +1030,9 @@ function thuis() {
   document.getElementById("mix").onclick = () => start(0, 0);
   document.getElementById("inst").onclick = () => { view = "inst"; teken(); };
   document.getElementById("klasknop").onclick = () => { view = "klaskies"; teken(); };
-  app.querySelectorAll(".halte").forEach(b => b.onclick = () => start(Number(b.dataset.w), 0));
+  app.querySelectorAll(".halte").forEach(b => b.onclick = () => start(Number(b.dataset.w), 0, tm));
+  document.getElementById("balleen").onclick = () => { S.inst.bereik = "alleen"; bewaar(); teken(); };
+  document.getElementById("btm").onclick = () => { S.inst.bereik = "tm"; bewaar(); teken(); };
 }
 
 function instellingen() {
@@ -1028,9 +1053,10 @@ function instellingen() {
   app.querySelectorAll(".lv").forEach(b => b.onclick = () => { const v = Number(b.dataset.v); if (i.modus === "aantal") i.aantal = v; else i.min = v; bewaar(); teken(); });
 }
 
-function start(week, extra) {
-  const i = S.inst; const rij = wachtrij(week);
-  sessie = { week, extra, rij: i.modus === "aantal" ? rij.slice(0, i.aantal + extra) : rij, i: 0, beantwoord: 0, goed: 0, mis: [],
+function start(week, extra, tm) {
+  tm = !!(tm && week && heeftEerder(week));
+  const i = S.inst; const rij = tm ? wachtrijTm(week) : wachtrij(week);
+  sessie = { week, tm, extra, rij: i.modus === "aantal" ? rij.slice(0, i.aantal + extra) : rij, i: 0, beantwoord: 0, goed: 0, mis: [],
     modus: i.modus, eind: i.modus === "tijd" ? Date.now() + (i.min + extra) * 60000 : null, op: false, elektraGetoond: false };
   view = "sessie"; if (tik) clearInterval(tik); if (sessie.eind) tik = setInterval(tijd, 500); teken();
 }
@@ -1125,7 +1151,7 @@ function klaar(q, ok, extra) {
 function einde() {
   if (tik) { clearInterval(tik); tik = null; }
   if (sessie.beantwoord > 0) { S.dagen[vandaag()] = (S.dagen[vandaag()] || 0) + 1;
-    S.sessies.push({ dag: vandaag(), week: sessie.week, n: sessie.beantwoord, goed: sessie.goed, mis: sessie.mis });
+    S.sessies.push({ dag: vandaag(), week: sessie.week, tm: sessie.tm, n: sessie.beantwoord, goed: sessie.goed, mis: sessie.mis });
     if (S.sessies.length > 200) S.sessies = S.sessies.slice(-200); bewaar(); }
   view = "eind"; teken();
 }
@@ -1133,15 +1159,15 @@ function eindView() {
   const s = sessie; const langer = S.inst.modus === "aantal" ? 5 : 2; const dw = dagenDezeWeek(), wd = weekdoel();
   const gemist = s.mis.map(id => Q.find(q => q.id === id)).filter(Boolean);
   const w = s.week ? WEKEN.find(x => x.n === s.week) : null;
-  app.innerHTML = `<div class="kaart"><div class="small muted">${w ? "Week " + w.n + " · " + esc(w.naam) : "Alle weken"}</div>
+  app.innerHTML = `<div class="kaart"><div class="small muted">${w ? (s.tm ? "Week " + WEKEN[0].n + " t/m " + w.n + " · tot en met " + esc(w.naam) : "Week " + w.n + " · " + esc(w.naam)) : "Alle weken"}</div>
     <div class="groot">${s.goed}<span class="muted" style="font-size:1.4rem"> / ${s.beantwoord}</span></div>
     <div>${s.beantwoord ? (s.goed === s.beantwoord ? "Alles goed." : "Wat je mist, komt binnenkort terug.") : "Geen vragen beantwoord; deze telt niet mee voor je weekdoel."}</div>
     <div class="small">Weekdoel: <b>${Math.min(dw, wd)}/${wd}</b> dagen${dw >= wd ? " — gehaald ✓" : ""}</div></div>
   ${gemist.length ? `<div class="kaart"><div class="small muted">Nog eens bekijken</div>${gemist.map(q => `<div>${esc(q.q)}</div>`).join("")}</div>` : ""}
   <button class="btn btn-primair" id="nog">Nog een ronde · ${lengte()}</button>
   <div class="rij"><button class="btn btn-stil" id="langer">Langere ronde · ${lengte(langer)}</button><button class="btn btn-stil" id="home">Terug naar overzicht</button></div>`;
-  document.getElementById("nog").onclick = () => start(s.week, 0);
-  document.getElementById("langer").onclick = () => start(s.week, langer);
+  document.getElementById("nog").onclick = () => start(s.week, 0, s.tm);
+  document.getElementById("langer").onclick = () => start(s.week, langer, s.tm);
   document.getElementById("home").onclick = () => { view = "thuis"; teken(); };
 }
 
@@ -1202,8 +1228,10 @@ function teken() {
   else if (view === "eind") eindView(); else if (view === "klaskies") klasKies(); else if (view === "klas") klasView();
   window.scrollTo(0, 0);
 }
-/* Directe link naar een week: ...#week=1 start meteen een sessie; #klas opent de klasmodus. */
+/* Directe link naar een week: ...#week=1 start meteen een sessie; #tot=3 oefent week 1 t/m 3; #klas opent de klasmodus. */
 (function () {
+  const t = location.hash.match(/tot=(\d+)/);
+  if (t && Q.some(q => q.w === Number(t[1]))) { start(Number(t[1]), 0, true); return; }
   const m = location.hash.match(/week=(\d+)/);
   if (m && Q.some(q => q.w === Number(m[1]))) { start(Number(m[1]), 0); return; }
   if (location.hash === "#klas") view = "klaskies";
