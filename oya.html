@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ọya · Begripstrainer Elektriciteit</title>
+<style>
+/* Design system Elektriciteit (applet-afspraken § 5.7a): zeegroen = vragen/knoppen, aubergine = uitleg,
+   amber = leerlingdenkbeeld, leigrijs = neutraal. Ladingen: + blauw, − rood (§ 3.1). Geen rood/groen voor goed/fout. */
+:root {
+  --zee:#1F6F6B; --zeed:#134A47; --zeet:#E8F3F2; --zeet2:#F0F7F6;
+  --aub:#5B2A6E; --aubd:#3E1C4B; --aubt:#F5EEF8;
+  --amber:#B45309; --amberd:#92400E; --ambert:#FFFBEB;
+  --lei:#4A5568; --tekst:#2d3748; --grijs:#5F6B7A; --lijn:#e2e8f0; --lijn2:#cbd5e0;
+  --bg:#f7f9fa; --kaart:#ffffff; --plus:#2B6CB0; --min:#C53030;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--tekst); font-family: "Segoe UI", Inter, system-ui, -apple-system, sans-serif;
+  font-size: 16px; line-height: 1.5; -webkit-text-size-adjust: 100%; }
+button { font: inherit; color: inherit; }
+button:focus-visible { outline: 3px solid var(--zee); outline-offset: 2px; }
+.wrap { max-width: 580px; margin: 0 auto; padding: 16px 16px 40px; display: flex; flex-direction: column; gap: 16px; }
+h1, h2, h3 { margin: 0; line-height: 1.2; }
+h1 { font-size: 1.7rem; font-weight: 800; color: var(--zeed); letter-spacing: -0.01em; }
+h2 { font-size: 1.2rem; color: var(--zeed); }
+.muted { color: var(--grijs); } .small { font-size: .85rem; }
+.top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.sub { display: flex; align-items: center; gap: 6px; }
+.info { border: 1px solid var(--lijn2); background: var(--kaart); border-radius: 999px; width: 24px; height: 24px; padding: 0;
+  font-size: .8rem; font-weight: 700; color: var(--zeed); cursor: pointer; line-height: 22px; }
+.infotekst { background: var(--kaart); border: 1px solid var(--lijn); border-left: 4px solid var(--lei); border-radius: 8px; padding: 10px 14px; font-size: .9rem; }
+.doel { background: var(--kaart); border: 1px solid var(--lijn); border-radius: 12px; padding: 8px 12px; text-align: right; min-width: 128px; }
+.doel .pips { display: flex; gap: 5px; justify-content: flex-end; margin: 2px 0; }
+.doel .pip { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--zee); }
+.doel .pip.vol { background: var(--zee); }
+.doel .pips.veel { gap: 3px; }
+.doel .pips.veel .pip { width: 11px; height: 11px; }
+.instkop { font-weight: 600; margin: 2px 0 6px; }
+.btn { border: 0; border-radius: 12px; padding: 13px 18px; font-weight: 600; cursor: pointer; text-align: center; }
+.btn-primair { background: var(--zee); color: #fff; font-size: 1.05rem; box-shadow: 0 3px 0 var(--zeed); }
+.btn-primair:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--zeed); }
+.btn-stil { background: var(--kaart); border: 1px solid var(--lijn2); color: var(--zeed); }
+.rij { display: flex; gap: 10px; flex-wrap: wrap; } .rij > * { flex: 1 1 0; }
+/* Weken als haltes */
+.lijnweken { list-style: none; margin: 0; padding: 0; position: relative; }
+.lijnweken::before { content: ""; position: absolute; left: 31px; top: 30px; bottom: 30px; width: 4px; background: var(--lijn2); border-radius: 2px; }
+.lijnweken li { position: relative; margin: 0 0 10px; }
+.halte { width: 100%; display: flex; align-items: center; gap: 14px; background: var(--kaart); border: 1px solid var(--lijn);
+  border-radius: 14px; padding: 10px 14px 10px 6px; cursor: pointer; text-align: left; }
+.halte:disabled { cursor: default; background: var(--bg); }
+.ring { flex: 0 0 52px; width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; position: relative; z-index: 1; }
+.ring span { width: 40px; height: 40px; border-radius: 50%; background: var(--kaart); display: grid; place-items: center;
+  font-weight: 800; font-size: 1.1rem; color: var(--zeed); }
+.halte:disabled .ring span { color: var(--grijs); background: var(--bg); }
+.hnaam { font-weight: 700; color: var(--tekst); } .hsub { font-size: .82rem; color: var(--grijs); }
+.hrechts { margin-left: auto; text-align: right; font-size: .78rem; color: var(--grijs); min-width: 78px; }
+.hrechts b { display: block; font-size: 1.05rem; color: var(--tekst); }
+/* Sessie */
+.kop { display: flex; align-items: center; gap: 12px; }
+.x { border: 0; background: none; font-size: 1.6rem; line-height: 1; cursor: pointer; color: var(--grijs); padding: 4px 8px; }
+.balk { flex: 1; height: 12px; background: var(--lijn); border-radius: 999px; overflow: hidden; }
+.balk div { height: 100%; background: var(--zee); border-radius: 999px; transition: width .3s; }
+.vkaart { background: var(--kaart); border: 1px solid var(--lijn); border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.chip { border: 1px solid var(--lijn2); border-radius: 999px; padding: 2px 10px; font-size: .78rem; color: var(--grijs); background: var(--kaart); }
+.vraag { font-size: 1.12rem; font-weight: 600; }
+.fig { display: flex; justify-content: center; } .fig svg { max-width: 100%; height: auto; }
+.opties { display: flex; flex-direction: column; gap: 10px; }
+.opt { text-align: left; border: 2px solid var(--lijn2); background: var(--kaart); border-radius: 12px; padding: 12px 14px; cursor: pointer;
+  box-shadow: 0 2px 0 var(--lijn2); display: flex; gap: 10px; align-items: flex-start; }
+.opt:hover:not(:disabled) { border-color: var(--zee); }
+.opt .lt { font-weight: 700; color: var(--grijs); min-width: 1.2em; }
+.opt.gekozen { border-color: var(--zee); background: var(--zeet2); }
+.opt.goed { border-color: var(--zee); background: var(--zeet); }
+.opt.goed::after { content: "✓ goed"; margin-left: auto; font-weight: 700; font-size: .85rem; color: var(--zeed); white-space: nowrap; }
+.opt.fout { border-color: var(--lei); background: #edf2f7; }
+.opt.fout::after { content: "✗ jouw keuze"; margin-left: auto; font-weight: 700; font-size: .85rem; color: var(--lei); white-space: nowrap; }
+.opt:disabled { cursor: default; }
+.trap2 { border-top: 1px dashed var(--lijn2); padding-top: 12px; display: flex; flex-direction: column; gap: 10px; }
+.trap2 .lbl { font-weight: 700; color: var(--zeed); }
+.koppel { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.kol { display: flex; flex-direction: column; gap: 8px; }
+.kitem { border: 2px solid var(--lijn2); background: var(--kaart); border-radius: 10px; padding: 10px; cursor: pointer; text-align: left; font-size: .95rem; }
+.kitem.sel { border-color: var(--zee); background: var(--zeet2); }
+.kitem.klaar { border-color: var(--zee); background: var(--zeet); color: var(--zeed); }
+.kitem.mis { animation: schud .4s; border-color: var(--lei); }
+@keyframes schud { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+.terug { background: var(--kaart); border: 1px solid var(--lijn); border-left: 4px solid var(--aub); border-radius: 12px; padding: 14px 16px;
+  display: flex; flex-direction: column; gap: 10px; }
+.terug h3 { color: var(--aubd); font-size: 1.1rem; }
+.noot { background: var(--ambert); border-left: 4px solid var(--amber); border-radius: 8px; padding: 8px 12px; font-size: .92rem; }
+.noot b { color: var(--amberd); }
+.boek { font-size: .88rem; color: var(--grijs); }
+.elektra { background: var(--zeet2); border: 1px dashed var(--zee); border-radius: 8px; padding: 8px 12px; font-size: .9rem; }
+.elektra button { margin-top: 6px; border: 1px solid var(--zee); background: var(--kaart); color: var(--zeed); border-radius: 8px; padding: 4px 10px; cursor: pointer; font-size: .85rem; }
+.kaart { background: var(--kaart); border: 1px solid var(--lijn); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+.groot { font-size: 2.8rem; font-weight: 800; color: var(--zeed); line-height: 1; }
+.seg { display: flex; border: 1px solid var(--lijn2); border-radius: 12px; overflow: hidden; }
+.seg button { flex: 1; border: 0; background: var(--kaart); padding: 10px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--zee); color: #fff; font-weight: 600; }
+.voet { font-size: .8rem; color: var(--grijs); text-align: center; }
+.legenda { display: flex; gap: 12px; flex-wrap: wrap; font-size: .78rem; color: var(--grijs); }
+/* Klasmodus (beamer) */
+body.klas .wrap { max-width: 1100px; font-size: 22px; }
+body.klas .vraag { font-size: 1.5rem; }
+body.klas .opt { padding: 14px 18px; }
+.opt.kk { border-color: var(--aub); background: var(--aubt); }
+.opt.kk::after { content: "gekozen"; margin-left: auto; font-weight: 700; font-size: .85rem; color: var(--aubd); white-space: nowrap; }
+.opt.kk.goed { border-color: var(--zee); background: var(--zeet); }
+.opt.kk.goed::after { content: "✓ goed · gekozen"; color: var(--zeed); }
+.opt.kk.toon:not(.goed) { border-color: var(--lei); background: #edf2f7; }
+.opt.kk.toon:not(.goed)::after { content: "✗ gekozen"; color: var(--lei); }
+.klasbalk { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.klasbalk .btn { font-size: 1rem; }
+.herstem { background: var(--zeet); border: 2px solid var(--zee); border-radius: 12px; padding: 10px 16px; font-weight: 700; color: var(--zeed); text-align: center; }
+.kolommen { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+@media (max-width: 760px) { .kolommen { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<script>
+/* ================================================================== */
+/* WEKEN EN VRAGEN                                                     */
+/* Vraagvormen:                                                        */
+/*  mc    : o[0] is het goede antwoord (volgorde wordt geschud)         */
+/*  twee  : tweetrapsvraag; o = antwoorden, r = redenen; [0] is goed     */
+/*  koppel: pairs = [[links, rechts], ...]                              */
+/* Velden: id, w (week), s (soort: begrip | kennis | reken), q, why,    */
+/*  par (boekparagraaf), mis (leerlingdenkbeeld, optioneel),            */
+/*  elektra (vraag voor Elektra, optioneel), fig (svg, optioneel)       */
+/* ================================================================== */
+const WEKEN = [
+  { n: 1, naam: "Lading en elektrisch veld", sub: "H18" },
+  { n: 2, naam: "Spanning en stroomsterkte", sub: "H20.1–20.5" },
+  { n: 3, naam: "Schakelingen", sub: "H20.6–20.14" },
+  { n: 5, naam: "Stroom en magnetisme", sub: "H21" },
+  { n: 6, naam: "Elektromagnetische inductie", sub: "H22.1–22.5" },
+  { n: 7, naam: "Toepassingen en transformatoren", sub: "H22.6–22.9" }
+];
+
+const FIG_INFLUENTIE = `<svg viewBox="0 0 300 150" width="300" role="img" aria-label="Een negatief geladen staaf links naast een metalen bol op een isolerende voet.">
+  <rect x="10" y="55" width="110" height="22" rx="6" fill="#f2c9c9" stroke="#C53030" stroke-width="2"/>
+  <g fill="#C53030" font-size="18" font-weight="700" text-anchor="middle"><text x="35" y="72">−</text><text x="60" y="72">−</text><text x="85" y="72">−</text><text x="108" y="72">−</text></g>
+  <text x="65" y="102" font-size="12" fill="#2d3748" text-anchor="middle">geladen staaf</text>
+  <circle cx="210" cy="66" r="42" fill="#e2e8f0" stroke="#4A5568" stroke-width="2"/>
+  <rect x="205" y="108" width="10" height="30" fill="#cbd5e0" stroke="#4A5568"/>
+  <rect x="180" y="136" width="60" height="8" fill="#cbd5e0" stroke="#4A5568"/>
+  <text x="176" y="128" font-size="12" fill="#2d3748" text-anchor="end">isolerende voet</text>
+  <text x="210" y="70" font-size="12" fill="#2d3748" text-anchor="middle">metalen bol</text>
+</svg>`;
+
+const FIG_VELD = `<svg viewBox="0 0 320 200" width="320" role="img" aria-label="Veldlijnenpatroon van twee ladingen; de pijlen wijzen van beide ladingen af en er lopen geen lijnen van de ene naar de andere lading."><path d="M111.4,98.3 L111.9,98.1 L113.5,97.7 L115.1,97.3 L116.7,96.9 L118.3,96.4 L119.9,96.0 L121.5,95.5 L123.0,95.1 L124.6,94.6 L126.2,94.2 L127.8,93.7 L129.4,93.2 L130.9,92.7 L132.5,92.2 L134.1,91.6 L135.6,91.1 L137.2,90.5 L138.7,89.9 L140.2,89.2 L141.7,88.5 L143.2,87.8 L144.6,87.0 L146.0,86.1 L147.3,85.1 L148.6,84.1 L149.8,82.9 L150.9,81.7 L151.8,80.3 L152.7,78.9 L153.4,77.5 L154.0,75.9 L154.6,74.4 L155.0,72.8 L155.4,71.2 L155.7,69.6 L156.0,67.9 L156.2,66.3 L156.4,64.7 L156.6,63.0 L156.8,61.4 L156.9,59.7 L157.0,58.1 L157.1,56.4 L157.2,54.8 L157.3,53.1 L157.3,51.5 L157.4,49.8 L157.5,48.2 L157.5,46.5 L157.5,44.9 L157.6,43.2 L157.6,41.6 L157.6,39.9 L157.7,38.3 L157.7,36.6 L157.7,35.0 L157.7,33.3 L157.7,31.7 L157.7,30.0 L157.7,28.4 L157.7,26.7 L157.7,25.1 L157.7,23.4 L157.7,21.8 L157.7,20.1 L157.7,18.5 L157.7,16.8 L157.7,15.2 L157.7,13.5 L157.7,11.9 L157.7,10.2 L157.7,8.6 L157.7,6.9 L157.7,5.3 L157.7,3.6 L157.7,2.0 L157.7,0.3 L157.6,-1.3 L157.6,-3.0 L157.6,-4.6" fill="none" stroke="#4A5568" stroke-width="1.4"/><path d="M109.7,95.3 L110.1,94.9 L111.2,93.8 L112.4,92.6 L113.5,91.4 L114.7,90.2 L115.8,89.0 L117.0,87.8 L118.1,86.6 L119.2,85.4 L120.3,84.2 L121.4,82.9 L122.5,81.7 L123.5,80.4 L124.5,79.1 L125.6,77.8 L126.5,76.5 L127.5,75.2 L128.4,73.8 L129.3,72.4 L130.2,71.0 L131.0,69.6 L131.8,68.2 L132.6,66.7 L133.3,65.2 L133.9,63.7 L134.6,62.2 L135.1,60.6 L135.7,59.0 L136.2,57.5 L136.6,55.9 L137.0,54.3 L137.4,52.7 L137.8,51.1 L138.1,49.4 L138.3,47.8 L138.6,46.2 L138.8,44.6 L139.0,42.9 L139.1,41.3 L139.3,39.6 L139.4,38.0 L139.5,36.3 L139.6,34.7 L139.7,33.0 L139.7,31.4 L139.7,29.7 L139.8,28.1 L139.8,26.4 L139.8,24.8 L139.8,23.1 L139.7,21.5 L139.7,19.8 L139.6,18.2 L139.6,16.5 L139.5,14.9 L139.5,13.2 L139.4,11.6 L139.3,9.9 L139.2,8.3 L139.1,6.7 L139.0,5.0 L138.9,3.4 L138.8,1.7 L138.7,0.1 L138.6,-1.6 L138.5,-3.2 L138.3,-4.9" fill="none" stroke="#4A5568" stroke-width="1.4"/><path d="M106.7,93.6 L106.8,93.1 L107.3,91.5 L107.7,89.9 L108.1,88.3 L108.5,86.7 L108.9,85.1 L109.2,83.5 L109.6,81.9 L110.0,80.3 L110.3,78.7 L110.6,77.0 L110.9,75.4 L111.2,73.8 L111.5,72.2 L111.8,70.5 L112.0,68.9 L112.2,67.3 L112.4,65.6 L112.6,64.0 L112.7,62.3 L112.9,60.7 L113.0,59.1 L113.0,57.4 L113.1,55.8 L113.1,54.1 L113.2,52.5 L113.2,50.8 L113.1,49.2 L113.1,47.5 L113.0,45.9 L112.9,44.2 L112.8,42.6 L112.7,40.9 L112.6,39.3 L112.4,37.6 L112.3,36.0 L112.1,34.3 L111.9,32.7 L111.6,31.1 L111.4,29.4 L111.2,27.8 L110.9,26.2 L110.6,24.6 L110.4,22.9 L110.1,21.3 L109.8,19.7 L109.4,18.1 L109.1,16.4 L108.8,14.8 L108.4,13.2 L108.1,11.6 L107.7,10.0 L107.4,8.4 L107.0,6.8 L106.6,5.2 L106.2,3.6 L105.8,2.0 L105.4,0.4 L105.0,-1.2 L104.6,-2.8 L104.2,-4.4" fill="none" stroke="#4A5568" stroke-width="1.4"/><path d="M103.3,93.6 L103.1,93.1 L102.7,91.5 L102.3,89.9 L101.8,88.3 L101.4,86.7 L100.9,85.2 L100.5,83.6 L100.0,82.0 L99.5,80.4 L99.0,78.8 L98.5,77.3 L98.0,75.7 L97.5,74.1 L96.9,72.6 L96.4,71.0 L95.8,69.5 L95.3,67.9 L94.7,66.4 L94.1,64.8 L93.5,63.3 L92.9,61.7 L92.3,60.2 L91.7,58.7 L91.0,57.2 L90.4,55.7 L89.7,54.1 L89.0,52.6 L88.4,51.1 L87.7,49.6 L87.0,48.1 L86.3,46.6 L85.5,45.2 L84.8,43.7 L84.1,42.2 L83.3,40.7 L82.6,39.3 L81.8,37.8 L81.1,36.3 L80.3,34.9 L79.5,33.4 L78.7,32.0 L77.9,30.5 L77.1,29.1 L76.3,27.6 L75.5,26.2 L74.7,24.8 L73.9,23.3 L73.0,21.9 L72.2,20.5 L71.4,19.1 L70.5,17.7 L69.7,16.2 L68.8,14.8 L68.0,13.4 L67.1,12.0 L66.2,10.6 L65.4,9.2 L64.5,7.8 L63.6,6.4 L62.7,5.0 L61.9,3.6 L61.0,2.2 L60.1,0.8 L59.2,-0.6 L58.3,-1.9 L57.4,-3.3 L56.5,-4.7" fill="none" stroke="#4A5568" stroke-width="1.4"/><path d="M100.3,95.3 L99.9,94.9 L98.8,93.8 L97.6,92.6 L96.4,91.5 L95.2,90.3 L94.1,89.2 L92.9,88.0 L91.7,86.9 L90.5,85.7 L89.3,84.6 L88.1,83.4 L86.9,82.3 L85.7,81.2 L84.5,80.1 L83.3,79.0 L82.1,77.8 L80.8,76.7 L79.6,75.6 L78.4,74.5 L77.1,73.4 L75.9,72.3 L74.7,71.3 L73.4,70.2 L72.2,69.1 L70.9,68.0 L69.7,67.0 L68.4,65.9 L67.1,64.8 L65.9,63.8 L64.6,62.7 L63.3,61.7 L62.0,60.6 L60.8,59.6 L59.5,58.5 L58.2,57.5 L56.9,56.5 L55.6,55.4 L54.3,54.4 L53.0,53.4 L51.7,52.4 L50.4,51.4 L49.1,50.3 L47.8,49.3 L46.5,48.3 L45.2,47.3 L43.9,46.3 L42.6,45.3 L41.3,44.3 L40.0,43.3 L38.6,42.3 L37.3,41.4 L36.0,40.4 L34.7,39.4 L33.3,38.4 L32.0,37.4 L30.7,36.5 L29.4,35.5 L28.0,34.5 L26.7,33.5 L25.4,32.6 L24.0,31.6 L22.7,30.6 L21.3,29.7 L20.0,28.7 L18.7,27.7 L17.3,26.8 L16.0,25.8 L14.6,24.9 L13.3,23.9 L11.9,23.0 L10.6,22.0 L9.2,21.1 L7.9,20.1 L6.5,19.2 L5.2,18.2 L3.8,17.3 L2.5,16.3 L1.1,15.4 L-0.2,14.5 L-1.6,13.5 L-3.0,12.6 L-4.3,11.7" fill="none" stroke="#4A5568" stroke-width="1.4"/><path d="M98.6,98.3 L98.1,98.1 L96.5,97.7 L94.9,97.3 L93.3,96.9 L91.7,96.5 L90.1,96.0 L88.5,95.6 L86.9,95.2 L85.3,94.8 L83.7,94.4 L82.1,94.0 L80.5,93.5 L78.9,93.1 L77.3,92.7 L75.7,92.3 L74.1,91.9 L72.5,91.5 L70.9,91.1 L69.3,90.7 L67.7,90.3 L66.1,89.9 L64.5,89.5 L62.9,89.1 L61.3,88.8 L59.7,88.4 L58.1,88.0 L56.5,87.6 L54.9,87.2 L53.3,86.8 L51.7,86.4 L50.1,86.1 L48.5,85.7 L46.9,85.3 L45.3,84.9 L43.7,84.6 L42.1,84.2 L40.5,83.8 L38.8,83.5 L37.2,83.1 L35.6,82.7 L34.0,82.3 L32.4,82.0 L30.8,81.6 L29.2,81.3 L27.6,80.9 L26.0,80.5 L24.4,80.2 L22.7,79.8 L21.1,79.5 L19.5,79.1 L17.9,78.7 L16.3,78.4 L14.7,78.0 L13.1,77.7 L11.5,77.3 L9.9,77.0 L8.2,76.6 L6.6,76.3 L5.0,75.9 L3.4,75.6 L1.8,75.2 L0.2,74.9 L-1.4,74.5 L-3.0,74.2 L-4.7,73.8" fill="none" stroke="#4A5568" stroke-width="1.4"/><path d="M98.6,101.7 L98.1,101.9 L96.5,102.3 L94.9,102.7 L93.3,103.1 L91.7,103.5 L90.1,104.0 L88.5,104.4 L86.9,104.8 L85.3,105.2 L83.7,105.6 L82.1,106.0 L80.5,106.5 L78.9,106.9 L77.3,107.3 L75.7,107.7 L74.1,108.1 L72.5,108.5 L70.9,108.9 L69.3,109.3 L67.7,109.7 L66.1,110.1 L64.5,110.5 L62.9,110.9 L61.3,111.2 L59.7,111.6 L58.1,112.0 L56.5,112.4 L54.9,112.8 L53.3,113.2 L51.7,113.6 L50.1,113.9 L48.5,114.3 L46.9,114.7 L45.3,115.1 L43.7,115.4 L42.1,115.8 L40.5,116.2 L38.8,116.5 L37.2,116.9 L35.6,117.3 L34.0,117.7 L32.4,118.0 L30.8,118.4 L29.2,118.7 L27.6,119.1 L26.0,119.5 L24.4,119.8 L22.7,120.2 L21.1,120.5 L19.5,120.9 L17.9,121.3 L16.3,121.6 L14.7,122.0 L13.1,122.3 L11.5,122.7 L9.9,123.0 L8.2,123.4 L6.6,123.7 L5.0,124.1 L3.4,124.4 L1.8,124.8 L0.2,125.1 L-1.4,125.5 L-3.0,125.8 L-4.7,126.2" fill="none" stroke="#4A5568" stroke-width="1.4"/><path d="M100.3,104.7 L99.9,105.1 L98.8,106.2 L97.6,107.4 L96.4,108.5 L95.2,109.7 L94.1,110.8 L92.9,112.0 L91.7,113.1 L90.5,114.3 L89.3,115.4 L88.1,116.6 L86.9,117.7 L85.7,118.8 L84.5,119.9 L83.3,121.0 L82.1,122.2 L80.8,123.3 L79.6,124.4 L78.4,125.5 L77.1,126.6 L75.9,127.7 L74.7,128.7 L73.4,129.8 L72.2,130.9 L70.9,132.0 L69.7,133.0 L68.4,134.1 L67.1,135.2 L65.9,136.2 L64.6,137.3 L63.3,138.3 L62.0,139.4 L60.8,140.4 L59.5,141.5 L58.2,142.5 L56.9,143.5 L55.6,144.6 L54.3,145.6 L53.0,146.6 L51.7,147.6 L50.4,148.6 L49.1,149.7 L47.8,150.7 L46.5,151.7 L45.2,152.7 L43.9,153.7 L42.6,154.7 L41.3,155.7 L40.0,156.7 L38.6,157.7 L37.3,158.6 L36.0,159.6 L34.7,160.6 L33.3,161.6 L32.0,162.6 L30.7,163.5 L29.4,164.5 L28.0,165.5 L26.7,166.5 L25.4,167.4 L24.0,168.4 L22.7,169.4 L21.3,170.3 L20.0,171.3 L18.7,172.3 L17.3,173.2 L16.0,174.2 L14.6,175.1 L13.3,176.1 L11.9,177.0 L10.6,178.0 L9.2,178.9 L7.9,179.9 L6.5,180.8 L5.2,181.8 L3.8,182.7 L2.5,183.7 L1.1,184.6 L-0.2,185.5 L-1.6,186.5 L-3.0,187.4 L-4.3,188.3" fill="none" stroke="#4A5568" stroke-width="1.4"/><path d="M103.3,106.4 L103.1,106.9 L102.7,108.5 L102.3,110.1 L101.8,111.7 L101.4,113.3 L100.9,114.8 L100.5,116.4 L100.0,118.0 L99.5,119.6 L99.0,121.2 L98.5,122.7 L98.0,124.3 L97.5,125.9 L96.9,127.4 L96.4,129.0 L95.8,130.5 L95.3,132.1 L94.7,133.6 L94.1,135.2 L93.5,136.7 L92.9,138.3 L92.3,139.8 L91.7,141.3 L91.0,142.8 L90.4,144.3 L89.7,145.9 L89.0,147.4 L88.4,148.9 L87.7,150.4 L87.0,151.9 L86.3,153.4 L85.5,154.8 L84.8,156.3 L84.1,157.8 L83.3,159.3 L82.6,160.7 L81.8,162.2 L81.1,163.7 L80.3,165.1 L79.5,166.6 L78.7,168.0 L77.9,169.5 L77.1,170.9 L76.3,172.4 L75.5,173.8 L74.7,175.2 L73.9,176.7 L73.0,178.1 L72.2,179.5 L71.4,180.9 L70.5,182.3 L69.7,183.8 L68.8,185.2 L68.0,186.6 L67.1,188.0 L66.2,189.4 L65.4,190.8 L64.5,192.2 L63.6,193.6 L62.7,195.0 L61.9,196.4 L61.0,197.8 L60.1,199.2 L59.2,200.6 L58.3,201.9 L57.4,203.3 L56.5,204.7" fill="none" stroke="#4A5568" stroke-width="1.4"/><path d="M106.7,106.4 L106.8,106.9 L107.3,108.5 L107.7,110.1 L108.1,111.7 L108.5,113.3 L108.9,114.9 L109.2,116.5 L109.6,118.1 L110.0,119.7 L110.3,121.3 L110.6,123.0 L110.9,124.6 L111.2,126.2 L111.5,127.8 L111.8,129.5 L112.0,131.1 L112.2,132.7 L112.4,134.4 L112.6,136.0 L112.7,137.7 L112.9,139.3 L113.0,140.9 L113.0,142.6 L113.1,144.2 L113.1,145.9 L113.2,147.5 L113.2,149.2 L113.1,150.8 L113.1,152.5 L113.0,154.1 L112.9,155.8 L112.8,157.4 L112.7,159.1 L112.6,160.7 L112.4,162.4 L112.3,164.0 L112.1,165.7 L111.9,167.3 L111.6,168.9 L111.4,170.6 L111.2,172.2 L110.9,173.8 L110.6,175.4 L110.4,177.1 L110.1,178.7 L109.8,180.3 L109.4,181.9 L109.1,183.6 L108.8,185.2 L108.4,186.8 L108.1,188.4 L107.7,190.0 L107.4,191.6 L107.0,193.2 L106.6,194.8 L106.2,196.4 L105.8,198.0 L105.4,199.6 L105.0,201.2 L104.6,202.8 L104.2,204.4" fill="none" stroke="#4A5568" stroke-width="1.4"/><path d="M109.7,104.7 L110.1,105.1 L111.2,106.2 L112.4,107.4 L113.5,108.6 L114.7,109.8 L115.8,111.0 L117.0,112.2 L118.1,113.4 L119.2,114.6 L120.3,115.8 L121.4,117.1 L122.5,118.3 L123.5,119.6 L124.5,120.9 L125.6,122.2 L126.5,123.5 L127.5,124.8 L128.4,126.2 L129.3,127.6 L130.2,129.0 L131.0,130.4 L131.8,131.8 L132.6,133.3 L133.3,134.8 L133.9,136.3 L134.6,137.8 L135.1,139.4 L135.7,141.0 L136.2,142.5 L136.6,144.1 L137.0,145.7 L137.4,147.3 L137.8,148.9 L138.1,150.6 L138.3,152.2 L138.6,153.8 L138.8,155.4 L139.0,157.1 L139.1,158.7 L139.3,160.4 L139.4,162.0 L139.5,163.7 L139.6,165.3 L139.7,167.0 L139.7,168.6 L139.7,170.3 L139.8,171.9 L139.8,173.6 L139.8,175.2 L139.8,176.9 L139.7,178.5 L139.7,180.2 L139.6,181.8 L139.6,183.5 L139.5,185.1 L139.5,186.8 L139.4,188.4 L139.3,190.1 L139.2,191.7 L139.1,193.3 L139.0,195.0 L138.9,196.6 L138.8,198.3 L138.7,199.9 L138.6,201.6 L138.5,203.2 L138.3,204.9" fill="none" stroke="#4A5568" stroke-width="1.4"/><path d="M111.4,101.7 L111.9,101.9 L113.5,102.3 L115.1,102.7 L116.7,103.1 L118.3,103.6 L119.9,104.0 L121.5,104.5 L123.0,104.9 L124.6,105.4 L126.2,105.8 L127.8,106.3 L129.4,106.8 L130.9,107.3 L132.5,107.8 L134.1,108.4 L135.6,108.9 L137.2,109.5 L138.7,110.1 L140.2,110.8 L141.7,111.5 L143.2,112.2 L144.6,113.0 L146.0,113.9 L147.3,114.9 L148.6,115.9 L149.8,117.1 L150.9,118.3 L151.8,119.7 L152.7,121.1 L153.4,122.5 L154.0,124.1 L154.6,125.6 L155.0,127.2 L155.4,128.8 L155.7,130.4 L156.0,132.1 L156.2,133.7 L156.4,135.3 L156.6,137.0 L156.8,138.6 L156.9,140.3 L157.0,141.9 L157.1,143.6 L157.2,145.2 L157.3,146.9 L157.3,148.5 L157.4,150.2 L157.5,151.8 L157.5,153.5 L157.5,155.1 L157.6,156.8 L157.6,158.4 L157.6,160.1 L157.7,161.7 L157.7,163.4 L157.7,165.0 L157.7,166.7 L157.7,168.3 L157.7,170.0 L157.7,171.6 L157.7,173.3 L157.7,174.9 L157.7,176.6 L157.7,178.2 L157.7,179.9 L157.7,181.5 L157.7,183.2 L157.7,184.8 L157.7,186.5 L157.7,188.1 L157.7,189.8 L157.7,191.4 L157.7,193.1 L157.7,194.7 L157.7,196.4 L157.7,198.0 L157.7,199.7 L157.6,201.3 L157.6,203.0 L157.6,204.6" fill="none" stroke="#4A5568" stroke-width="1.4"/><path d="M221.4,98.3 L221.9,98.1 L223.5,97.7 L225.1,97.3 L226.7,96.9 L228.3,96.5 L229.9,96.0 L231.5,95.6 L233.1,95.2 L234.7,94.8 L236.3,94.4 L237.9,94.0 L239.5,93.5 L241.1,93.1 L242.7,92.7 L244.3,92.3 L245.9,91.9 L247.5,91.5 L249.1,91.1 L250.7,90.7 L252.3,90.3 L253.9,89.9 L255.5,89.5 L257.1,89.1 L258.7,88.8 L260.3,88.4 L261.9,88.0 L263.5,87.6 L265.1,87.2 L266.7,86.8 L268.3,86.4 L269.9,86.1 L271.5,85.7 L273.1,85.3 L274.7,84.9 L276.3,84.6 L277.9,84.2 L279.5,83.8 L281.2,83.5 L282.8,83.1 L284.4,82.7 L286.0,82.3 L287.6,82.0 L289.2,81.6 L290.8,81.3 L292.4,80.9 L294.0,80.5 L295.6,80.2 L297.3,79.8 L298.9,79.5 L300.5,79.1 L302.1,78.7 L303.7,78.4 L305.3,78.0 L306.9,77.7 L308.5,77.3 L310.1,77.0 L311.8,76.6 L313.4,76.3 L315.0,75.9 L316.6,75.6 L318.2,75.2 L319.8,74.9 L321.4,74.5 L323.0,74.2 L324.7,73.8" fill="none" stroke="#4A5568" stroke-width="1.4"/><path d="M219.7,95.3 L220.1,94.9 L221.2,93.8 L222.4,92.6 L223.6,91.5 L224.8,90.3 L225.9,89.2 L227.1,88.0 L228.3,86.9 L229.5,85.7 L230.7,84.6 L231.9,83.4 L233.1,82.3 L234.3,81.2 L235.5,80.1 L236.7,79.0 L237.9,77.8 L239.2,76.7 L240.4,75.6 L241.6,74.5 L242.9,73.4 L244.1,72.3 L245.3,71.3 L246.6,70.2 L247.8,69.1 L249.1,68.0 L250.3,67.0 L251.6,65.9 L252.9,64.8 L254.1,63.8 L255.4,62.7 L256.7,61.7 L258.0,60.6 L259.2,59.6 L260.5,58.5 L261.8,57.5 L263.1,56.5 L264.4,55.4 L265.7,54.4 L267.0,53.4 L268.3,52.4 L269.6,51.4 L270.9,50.3 L272.2,49.3 L273.5,48.3 L274.8,47.3 L276.1,46.3 L277.4,45.3 L278.7,44.3 L280.0,43.3 L281.4,42.3 L282.7,41.4 L284.0,40.4 L285.3,39.4 L286.7,38.4 L288.0,37.4 L289.3,36.5 L290.6,35.5 L292.0,34.5 L293.3,33.5 L294.6,32.6 L296.0,31.6 L297.3,30.6 L298.7,29.7 L300.0,28.7 L301.3,27.7 L302.7,26.8 L304.0,25.8 L305.4,24.9 L306.7,23.9 L308.1,23.0 L309.4,22.0 L310.8,21.1 L312.1,20.1 L313.5,19.2 L314.8,18.2 L316.2,17.3 L317.5,16.3 L318.9,15.4 L320.2,14.5 L321.6,13.5 L323.0,12.6 L324.3,11.7" fill="none" stroke="#4A5568" stroke-width="1.4"/><path d="M216.7,93.6 L216.9,93.1 L217.3,91.5 L217.7,89.9 L218.2,88.3 L218.6,86.7 L219.1,85.2 L219.5,83.6 L220.0,82.0 L220.5,80.4 L221.0,78.8 L221.5,77.3 L222.0,75.7 L222.5,74.1 L223.1,72.6 L223.6,71.0 L224.2,69.5 L224.7,67.9 L225.3,66.4 L225.9,64.8 L226.5,63.3 L227.1,61.7 L227.7,60.2 L228.3,58.7 L229.0,57.2 L229.6,55.7 L230.3,54.1 L231.0,52.6 L231.6,51.1 L232.3,49.6 L233.0,48.1 L233.7,46.6 L234.5,45.2 L235.2,43.7 L235.9,42.2 L236.7,40.7 L237.4,39.3 L238.2,37.8 L238.9,36.3 L239.7,34.9 L240.5,33.4 L241.3,32.0 L242.1,30.5 L242.9,29.1 L243.7,27.6 L244.5,26.2 L245.3,24.8 L246.1,23.3 L247.0,21.9 L247.8,20.5 L248.6,19.1 L249.5,17.7 L250.3,16.2 L251.2,14.8 L252.0,13.4 L252.9,12.0 L253.8,10.6 L254.6,9.2 L255.5,7.8 L256.4,6.4 L257.3,5.0 L258.1,3.6 L259.0,2.2 L259.9,0.8 L260.8,-0.6 L261.7,-1.9 L262.6,-3.3 L263.5,-4.7" fill="none" stroke="#4A5568" stroke-width="1.4"/><path d="M213.3,93.6 L213.2,93.1 L212.7,91.5 L212.3,89.9 L211.9,88.3 L211.5,86.7 L211.1,85.1 L210.8,83.5 L210.4,81.9 L210.0,80.3 L209.7,78.7 L209.4,77.0 L209.1,75.4 L208.8,73.8 L208.5,72.2 L208.2,70.5 L208.0,68.9 L207.8,67.3 L207.6,65.6 L207.4,64.0 L207.3,62.3 L207.1,60.7 L207.0,59.1 L207.0,57.4 L206.9,55.8 L206.9,54.1 L206.8,52.5 L206.8,50.8 L206.9,49.2 L206.9,47.5 L207.0,45.9 L207.1,44.2 L207.2,42.6 L207.3,40.9 L207.4,39.3 L207.6,37.6 L207.7,36.0 L207.9,34.3 L208.1,32.7 L208.4,31.1 L208.6,29.4 L208.8,27.8 L209.1,26.2 L209.4,24.6 L209.6,22.9 L209.9,21.3 L210.2,19.7 L210.6,18.1 L210.9,16.4 L211.2,14.8 L211.6,13.2 L211.9,11.6 L212.3,10.0 L212.6,8.4 L213.0,6.8 L213.4,5.2 L213.8,3.6 L214.2,2.0 L214.6,0.4 L215.0,-1.2 L215.4,-2.8 L215.8,-4.4" fill="none" stroke="#4A5568" stroke-width="1.4"/><path d="M210.3,95.3 L209.9,94.9 L208.8,93.8 L207.6,92.6 L206.5,91.4 L205.3,90.2 L204.2,89.0 L203.0,87.8 L201.9,86.6 L200.8,85.4 L199.7,84.2 L198.6,82.9 L197.5,81.7 L196.5,80.4 L195.5,79.1 L194.4,77.8 L193.5,76.5 L192.5,75.2 L191.6,73.8 L190.7,72.4 L189.8,71.0 L189.0,69.6 L188.2,68.2 L187.4,66.7 L186.7,65.2 L186.1,63.7 L185.4,62.2 L184.9,60.6 L184.3,59.0 L183.8,57.5 L183.4,55.9 L183.0,54.3 L182.6,52.7 L182.2,51.1 L181.9,49.4 L181.7,47.8 L181.4,46.2 L181.2,44.6 L181.0,42.9 L180.9,41.3 L180.7,39.6 L180.6,38.0 L180.5,36.3 L180.4,34.7 L180.3,33.0 L180.3,31.4 L180.3,29.7 L180.2,28.1 L180.2,26.4 L180.2,24.8 L180.2,23.1 L180.3,21.5 L180.3,19.8 L180.4,18.2 L180.4,16.5 L180.5,14.9 L180.5,13.2 L180.6,11.6 L180.7,9.9 L180.8,8.3 L180.9,6.7 L181.0,5.0 L181.1,3.4 L181.2,1.7 L181.3,0.1 L181.4,-1.6 L181.5,-3.2 L181.7,-4.9" fill="none" stroke="#4A5568" stroke-width="1.4"/><path d="M208.6,98.3 L208.1,98.1 L206.5,97.7 L204.9,97.3 L203.3,96.9 L201.7,96.4 L200.1,96.0 L198.5,95.5 L197.0,95.1 L195.4,94.6 L193.8,94.2 L192.2,93.7 L190.6,93.2 L189.1,92.7 L187.5,92.2 L185.9,91.6 L184.4,91.1 L182.8,90.5 L181.3,89.9 L179.8,89.2 L178.3,88.5 L176.8,87.8 L175.4,87.0 L174.0,86.1 L172.7,85.1 L171.4,84.1 L170.2,82.9 L169.1,81.7 L168.2,80.3 L167.3,78.9 L166.6,77.5 L166.0,75.9 L165.4,74.4 L165.0,72.8 L164.6,71.2 L164.3,69.6 L164.0,67.9 L163.8,66.3 L163.6,64.7 L163.4,63.0 L163.2,61.4 L163.1,59.7 L163.0,58.1 L162.9,56.4 L162.8,54.8 L162.7,53.1 L162.7,51.5 L162.6,49.8 L162.5,48.2 L162.5,46.5 L162.5,44.9 L162.4,43.2 L162.4,41.6 L162.4,39.9 L162.3,38.3 L162.3,36.6 L162.3,35.0 L162.3,33.3 L162.3,31.7 L162.3,30.0 L162.3,28.4 L162.3,26.7 L162.3,25.1 L162.3,23.4 L162.3,21.8 L162.3,20.1 L162.3,18.5 L162.3,16.8 L162.3,15.2 L162.3,13.5 L162.3,11.9 L162.3,10.2 L162.3,8.6 L162.3,6.9 L162.3,5.3 L162.3,3.6 L162.3,2.0 L162.3,0.3 L162.4,-1.3 L162.4,-3.0 L162.4,-4.6" fill="none" stroke="#4A5568" stroke-width="1.4"/><path d="M208.6,101.7 L208.1,101.9 L206.5,102.3 L204.9,102.7 L203.3,103.1 L201.7,103.6 L200.1,104.0 L198.5,104.5 L197.0,104.9 L195.4,105.4 L193.8,105.8 L192.2,106.3 L190.6,106.8 L189.1,107.3 L187.5,107.8 L185.9,108.4 L184.4,108.9 L182.8,109.5 L181.3,110.1 L179.8,110.8 L178.3,111.5 L176.8,112.2 L175.4,113.0 L174.0,113.9 L172.7,114.9 L171.4,115.9 L170.2,117.1 L169.1,118.3 L168.2,119.7 L167.3,121.1 L166.6,122.5 L166.0,124.1 L165.4,125.6 L165.0,127.2 L164.6,128.8 L164.3,130.4 L164.0,132.1 L163.8,133.7 L163.6,135.3 L163.4,137.0 L163.2,138.6 L163.1,140.3 L163.0,141.9 L162.9,143.6 L162.8,145.2 L162.7,146.9 L162.7,148.5 L162.6,150.2 L162.5,151.8 L162.5,153.5 L162.5,155.1 L162.4,156.8 L162.4,158.4 L162.4,160.1 L162.3,161.7 L162.3,163.4 L162.3,165.0 L162.3,166.7 L162.3,168.3 L162.3,170.0 L162.3,171.6 L162.3,173.3 L162.3,174.9 L162.3,176.6 L162.3,178.2 L162.3,179.9 L162.3,181.5 L162.3,183.2 L162.3,184.8 L162.3,186.5 L162.3,188.1 L162.3,189.8 L162.3,191.4 L162.3,193.1 L162.3,194.7 L162.3,196.4 L162.3,198.0 L162.3,199.7 L162.4,201.3 L162.4,203.0 L162.4,204.6" fill="none" stroke="#4A5568" stroke-width="1.4"/><path d="M210.3,104.7 L209.9,105.1 L208.8,106.2 L207.6,107.4 L206.5,108.6 L205.3,109.8 L204.2,111.0 L203.0,112.2 L201.9,113.4 L200.8,114.6 L199.7,115.8 L198.6,117.1 L197.5,118.3 L196.5,119.6 L195.5,120.9 L194.4,122.2 L193.5,123.5 L192.5,124.8 L191.6,126.2 L190.7,127.6 L189.8,129.0 L189.0,130.4 L188.2,131.8 L187.4,133.3 L186.7,134.8 L186.1,136.3 L185.4,137.8 L184.9,139.4 L184.3,141.0 L183.8,142.5 L183.4,144.1 L183.0,145.7 L182.6,147.3 L182.2,148.9 L181.9,150.6 L181.7,152.2 L181.4,153.8 L181.2,155.4 L181.0,157.1 L180.9,158.7 L180.7,160.4 L180.6,162.0 L180.5,163.7 L180.4,165.3 L180.3,167.0 L180.3,168.6 L180.3,170.3 L180.2,171.9 L180.2,173.6 L180.2,175.2 L180.2,176.9 L180.3,178.5 L180.3,180.2 L180.4,181.8 L180.4,183.5 L180.5,185.1 L180.5,186.8 L180.6,188.4 L180.7,190.1 L180.8,191.7 L180.9,193.3 L181.0,195.0 L181.1,196.6 L181.2,198.3 L181.3,199.9 L181.4,201.6 L181.5,203.2 L181.7,204.9" fill="none" stroke="#4A5568" stroke-width="1.4"/><path d="M213.3,106.4 L213.2,106.9 L212.7,108.5 L212.3,110.1 L211.9,111.7 L211.5,113.3 L211.1,114.9 L210.8,116.5 L210.4,118.1 L210.0,119.7 L209.7,121.3 L209.4,123.0 L209.1,124.6 L208.8,126.2 L208.5,127.8 L208.2,129.5 L208.0,131.1 L207.8,132.7 L207.6,134.4 L207.4,136.0 L207.3,137.7 L207.1,139.3 L207.0,140.9 L207.0,142.6 L206.9,144.2 L206.9,145.9 L206.8,147.5 L206.8,149.2 L206.9,150.8 L206.9,152.5 L207.0,154.1 L207.1,155.8 L207.2,157.4 L207.3,159.1 L207.4,160.7 L207.6,162.4 L207.7,164.0 L207.9,165.7 L208.1,167.3 L208.4,168.9 L208.6,170.6 L208.8,172.2 L209.1,173.8 L209.4,175.4 L209.6,177.1 L209.9,178.7 L210.2,180.3 L210.6,181.9 L210.9,183.6 L211.2,185.2 L211.6,186.8 L211.9,188.4 L212.3,190.0 L212.6,191.6 L213.0,193.2 L213.4,194.8 L213.8,196.4 L214.2,198.0 L214.6,199.6 L215.0,201.2 L215.4,202.8 L215.8,204.4" fill="none" stroke="#4A5568" stroke-width="1.4"/><path d="M216.7,106.4 L216.9,106.9 L217.3,108.5 L217.7,110.1 L218.2,111.7 L218.6,113.3 L219.1,114.8 L219.5,116.4 L220.0,118.0 L220.5,119.6 L221.0,121.2 L221.5,122.7 L222.0,124.3 L222.5,125.9 L223.1,127.4 L223.6,129.0 L224.2,130.5 L224.7,132.1 L225.3,133.6 L225.9,135.2 L226.5,136.7 L227.1,138.3 L227.7,139.8 L228.3,141.3 L229.0,142.8 L229.6,144.3 L230.3,145.9 L231.0,147.4 L231.6,148.9 L232.3,150.4 L233.0,151.9 L233.7,153.4 L234.5,154.8 L235.2,156.3 L235.9,157.8 L236.7,159.3 L237.4,160.7 L238.2,162.2 L238.9,163.7 L239.7,165.1 L240.5,166.6 L241.3,168.0 L242.1,169.5 L242.9,170.9 L243.7,172.4 L244.5,173.8 L245.3,175.2 L246.1,176.7 L247.0,178.1 L247.8,179.5 L248.6,180.9 L249.5,182.3 L250.3,183.8 L251.2,185.2 L252.0,186.6 L252.9,188.0 L253.8,189.4 L254.6,190.8 L255.5,192.2 L256.4,193.6 L257.3,195.0 L258.1,196.4 L259.0,197.8 L259.9,199.2 L260.8,200.6 L261.7,201.9 L262.6,203.3 L263.5,204.7" fill="none" stroke="#4A5568" stroke-width="1.4"/><path d="M219.7,104.7 L220.1,105.1 L221.2,106.2 L222.4,107.4 L223.6,108.5 L224.8,109.7 L225.9,110.8 L227.1,112.0 L228.3,113.1 L229.5,114.3 L230.7,115.4 L231.9,116.6 L233.1,117.7 L234.3,118.8 L235.5,119.9 L236.7,121.0 L237.9,122.2 L239.2,123.3 L240.4,124.4 L241.6,125.5 L242.9,126.6 L244.1,127.7 L245.3,128.7 L246.6,129.8 L247.8,130.9 L249.1,132.0 L250.3,133.0 L251.6,134.1 L252.9,135.2 L254.1,136.2 L255.4,137.3 L256.7,138.3 L258.0,139.4 L259.2,140.4 L260.5,141.5 L261.8,142.5 L263.1,143.5 L264.4,144.6 L265.7,145.6 L267.0,146.6 L268.3,147.6 L269.6,148.6 L270.9,149.7 L272.2,150.7 L273.5,151.7 L274.8,152.7 L276.1,153.7 L277.4,154.7 L278.7,155.7 L280.0,156.7 L281.4,157.7 L282.7,158.6 L284.0,159.6 L285.3,160.6 L286.7,161.6 L288.0,162.6 L289.3,163.5 L290.6,164.5 L292.0,165.5 L293.3,166.5 L294.6,167.4 L296.0,168.4 L297.3,169.4 L298.7,170.3 L300.0,171.3 L301.3,172.3 L302.7,173.2 L304.0,174.2 L305.4,175.1 L306.7,176.1 L308.1,177.0 L309.4,178.0 L310.8,178.9 L312.1,179.9 L313.5,180.8 L314.8,181.8 L316.2,182.7 L317.5,183.7 L318.9,184.6 L320.2,185.5 L321.6,186.5 L323.0,187.4 L324.3,188.3" fill="none" stroke="#4A5568" stroke-width="1.4"/><path d="M221.4,101.7 L221.9,101.9 L223.5,102.3 L225.1,102.7 L226.7,103.1 L228.3,103.5 L229.9,104.0 L231.5,104.4 L233.1,104.8 L234.7,105.2 L236.3,105.6 L237.9,106.0 L239.5,106.5 L241.1,106.9 L242.7,107.3 L244.3,107.7 L245.9,108.1 L247.5,108.5 L249.1,108.9 L250.7,109.3 L252.3,109.7 L253.9,110.1 L255.5,110.5 L257.1,110.9 L258.7,111.2 L260.3,111.6 L261.9,112.0 L263.5,112.4 L265.1,112.8 L266.7,113.2 L268.3,113.6 L269.9,113.9 L271.5,114.3 L273.1,114.7 L274.7,115.1 L276.3,115.4 L277.9,115.8 L279.5,116.2 L281.2,116.5 L282.8,116.9 L284.4,117.3 L286.0,117.7 L287.6,118.0 L289.2,118.4 L290.8,118.7 L292.4,119.1 L294.0,119.5 L295.6,119.8 L297.3,120.2 L298.9,120.5 L300.5,120.9 L302.1,121.3 L303.7,121.6 L305.3,122.0 L306.9,122.3 L308.5,122.7 L310.1,123.0 L311.8,123.4 L313.4,123.7 L315.0,124.1 L316.6,124.4 L318.2,124.8 L319.8,125.1 L321.4,125.5 L323.0,125.8 L324.7,126.2" fill="none" stroke="#4A5568" stroke-width="1.4"/><path d="M156.0,70.8 L156.5,80.7 L149.0,77.8Z" fill="#4A5568"/><path d="M138.4,49.0 L140.1,58.7 L132.3,56.8Z" fill="#4A5568"/><path d="M112.6,38.8 L117.1,47.5 L109.1,48.0Z" fill="#4A5568"/><path d="M83.9,41.7 L91.4,48.1 L84.2,51.6Z" fill="#4A5568"/><path d="M59.1,58.2 L68.6,60.8 L63.5,67.0Z" fill="#4A5568"/><path d="M44.8,84.8 L54.5,83.0 L52.6,90.8Z" fill="#4A5568"/><path d="M44.8,115.2 L52.6,109.2 L54.5,117.0Z" fill="#4A5568"/><path d="M59.1,141.8 L63.5,133.0 L68.6,139.2Z" fill="#4A5568"/><path d="M83.9,158.3 L84.2,148.4 L91.4,151.9Z" fill="#4A5568"/><path d="M112.6,161.2 L109.1,152.0 L117.1,152.5Z" fill="#4A5568"/><path d="M138.4,151.0 L132.3,143.2 L140.1,141.3Z" fill="#4A5568"/><path d="M156.0,129.2 L149.0,122.2 L156.5,119.3Z" fill="#4A5568"/><path d="M275.2,84.8 L267.4,90.8 L265.5,83.0Z" fill="#4A5568"/><path d="M260.9,58.2 L256.5,67.0 L251.4,60.8Z" fill="#4A5568"/><path d="M236.1,41.7 L235.8,51.6 L228.6,48.1Z" fill="#4A5568"/><path d="M207.4,38.8 L210.9,48.0 L202.9,47.5Z" fill="#4A5568"/><path d="M181.6,49.0 L187.7,56.8 L179.9,58.7Z" fill="#4A5568"/><path d="M164.0,70.8 L171.0,77.8 L163.5,80.7Z" fill="#4A5568"/><path d="M164.0,129.2 L163.5,119.3 L171.0,122.2Z" fill="#4A5568"/><path d="M181.6,151.0 L179.9,141.3 L187.7,143.2Z" fill="#4A5568"/><path d="M207.4,161.2 L202.9,152.5 L210.9,152.0Z" fill="#4A5568"/><path d="M236.1,158.3 L228.6,151.9 L235.8,148.4Z" fill="#4A5568"/><path d="M260.9,141.8 L251.4,139.2 L256.5,133.0Z" fill="#4A5568"/><path d="M275.2,115.2 L265.5,117.0 L267.4,109.2Z" fill="#4A5568"/><circle cx="105" cy="100" r="9" fill="#CBD2DB" stroke="#4A5568" stroke-width="2"/><text x="105" y="105" text-anchor="middle" font-size="15" font-weight="700" fill="#2d3748">?</text><circle cx="215" cy="100" r="9" fill="#CBD2DB" stroke="#4A5568" stroke-width="2"/><text x="215" y="105" text-anchor="middle" font-size="15" font-weight="700" fill="#2d3748">?</text></svg>`;
+const FIG_BOLLETJES = `<svg viewBox="0 0 320 130" width="320" role="img" aria-label="Links: bolletjes A en B hangen aan draadjes en wijken uit elkaar. Rechts: bolletjes B en C hangen naar elkaar toe.">
+  <g stroke="#4A5568" stroke-width="3"><line x1="15" y1="12" x2="145" y2="12"/><line x1="175" y1="12" x2="305" y2="12"/></g>
+  <g stroke="#4A5568" stroke-width="1.2"><line x1="65" y1="12" x2="45" y2="92"/><line x1="95" y1="12" x2="115" y2="92"/><line x1="223" y1="12" x2="234" y2="92"/><line x1="257" y1="12" x2="246" y2="92"/></g>
+  <circle cx="45" cy="100" r="10" fill="#C6D8F2" stroke="#2B6CB0" stroke-width="2"/><text x="45" y="105" text-anchor="middle" font-size="14" font-weight="700" fill="#2C5282">+</text>
+  <circle cx="115" cy="100" r="10" fill="#CBD2DB" stroke="#4A5568" stroke-width="2"/>
+  <circle cx="229" cy="100" r="10" fill="#CBD2DB" stroke="#4A5568" stroke-width="2"/>
+  <circle cx="251" cy="100" r="10" fill="#CBD2DB" stroke="#4A5568" stroke-width="2"/>
+  <g font-size="13" fill="#2d3748" text-anchor="middle"><text x="45" y="126">A</text><text x="115" y="126">B</text><text x="227" y="126">B</text><text x="253" y="126">C</text></g>
+</svg>`;
+const FIG_DRIE = `<svg viewBox="0 0 320 70" width="320" role="img" aria-label="Drie ladingen op één lijn, op gelijke afstanden: links −q, midden +q, rechts +q.">
+  <line x1="40" y1="32" x2="280" y2="32" stroke="#cbd5e0" stroke-width="2" stroke-dasharray="4 4"/>
+  <circle cx="60" cy="32" r="15" fill="#f2c9c9" stroke="#C53030" stroke-width="2"/><text x="60" y="37" text-anchor="middle" font-size="14" font-weight="700" fill="#C53030">−q</text>
+  <circle cx="160" cy="32" r="15" fill="#C6D8F2" stroke="#2B6CB0" stroke-width="2"/><text x="160" y="37" text-anchor="middle" font-size="14" font-weight="700" fill="#2C5282">+q</text>
+  <circle cx="260" cy="32" r="15" fill="#C6D8F2" stroke="#2B6CB0" stroke-width="2"/><text x="260" y="37" text-anchor="middle" font-size="14" font-weight="700" fill="#2C5282">+q</text>
+  <g font-size="12" fill="#5F6B7A" text-anchor="middle"><text x="110" y="62">d</text><text x="210" y="62">d</text></g>
+</svg>`;
+const BATT = (x, y, lab) => `<line x1="${x-14}" y1="${y-5}" x2="${x+14}" y2="${y-5}" stroke="#2d3748" stroke-width="2"/><line x1="${x-7}" y1="${y+5}" x2="${x+7}" y2="${y+5}" stroke="#2d3748" stroke-width="5"/><text x="${x-20}" y="${y+4}" font-size="12" fill="#2d3748" text-anchor="end">${lab}</text>`;
+const LAMP = (x, y) => `<circle cx="${x}" cy="${y}" r="14" fill="#fff" stroke="#2d3748" stroke-width="2"/><line x1="${x-10}" y1="${y-10}" x2="${x+10}" y2="${y+10}" stroke="#2d3748" stroke-width="2"/><line x1="${x-10}" y1="${y+10}" x2="${x+10}" y2="${y-10}" stroke="#2d3748" stroke-width="2"/>`;
+const METER = (x, y, t, sub) => `<circle cx="${x}" cy="${y}" r="13" fill="#fff" stroke="#2d3748" stroke-width="2"/><text x="${x}" y="${y+5}" font-size="14" font-weight="700" fill="#2d3748" text-anchor="middle">${t}<tspan font-size="9" dy="3">${sub||""}</tspan></text>`;
+const FIG_AMPERE = `<svg viewBox="0 0 320 160" width="320" role="img" aria-label="Kring met een batterij, ampèremeter A1, een lampje en ampèremeter A2 achter elkaar.">
+  <g stroke="#2d3748" stroke-width="2" fill="none"><path d="M40,85 V30 H87 M113,30 H146 M174,30 H207 M233,30 H285 V135 H40 V95"/></g>
+  ${BATT(40, 90, "")}${METER(100, 30, "A", "1")}${LAMP(160, 30)}${METER(220, 30, "A", "2")}
+</svg>`;
+const FIG_OPEN = `<svg viewBox="0 0 320 200" width="320" role="img" aria-label="Kring met een batterij van 9 V, een lampje en een open schakelaar; een voltmeter staat over de open schakelaar.">
+  <g stroke="#2d3748" stroke-width="2" fill="none"><path d="M40,85 V30 H146 M174,30 H285 V135 H190 M150,135 H40 V95"/>
+  <path d="M150,135 L184,118"/><path d="M130,135 V175 H147 M173,175 H210 V135"/></g>
+  <circle cx="150" cy="135" r="3" fill="#2d3748"/><circle cx="190" cy="135" r="3" fill="#2d3748"/>
+  ${BATT(40, 90, "9 V")}${LAMP(160, 30)}${METER(160, 175, "V")}
+  <text x="168" y="112" font-size="11" fill="#5F6B7A">open schakelaar</text>
+</svg>`;
+const FIG_UI = `<svg viewBox="0 0 320 180" width="320" role="img" aria-label="Diagram met U horizontaal en I verticaal. Twee rechte lijnen door de oorsprong: lijn A loopt steiler dan lijn B.">
+  <g stroke="#2d3748" stroke-width="2"><line x1="40" y1="150" x2="300" y2="150"/><line x1="40" y1="150" x2="40" y2="15"/></g>
+  <path d="M300,150 l-8,-4 v8z M40,15 l-4,8 h8z" fill="#2d3748"/>
+  <line x1="40" y1="150" x2="210" y2="30" stroke="#1F6F6B" stroke-width="3"/><line x1="40" y1="150" x2="290" y2="95" stroke="#5B2A6E" stroke-width="3" stroke-dasharray="8 4"/>
+  <g font-size="14" font-weight="700"><text x="214" y="30" fill="#134A47">A</text><text x="294" y="94" fill="#3E1C4B">B</text></g>
+  <g font-size="13" fill="#2d3748"><text x="300" y="170" text-anchor="end">U (V)</text><text x="48" y="22">I (A)</text></g>
+</svg>`;
+const FIG_SINUS = `<svg viewBox="0 0 320 170" width="320" role="img" aria-label="Sinusvormige netspanning tegen de tijd, met een piekwaarde van 325 V en een dalwaarde van −325 V.">
+  <g stroke="#2d3748" stroke-width="2"><line x1="50" y1="85" x2="305" y2="85"/><line x1="50" y1="160" x2="50" y2="10"/></g>
+  <g stroke="#cbd5e0" stroke-dasharray="4 4"><line x1="50" y1="25" x2="300" y2="25"/><line x1="50" y1="145" x2="300" y2="145"/></g>
+  <path d="M50,85.0 L54,72.5 L58,60.6 L62,49.7 L66,40.4 L70,33.0 L74,27.9 L78,25.3 L82,25.3 L86,27.9 L90,33.0 L94,40.4 L98,49.7 L102,60.6 L106,72.5 L110,85.0 L114,97.5 L118,109.4 L122,120.3 L126,129.6 L130,137.0 L134,142.1 L138,144.7 L142,144.7 L146,142.1 L150,137.0 L154,129.6 L158,120.3 L162,109.4 L166,97.5 L170,85.0 L174,72.5 L178,60.6 L182,49.7 L186,40.4 L190,33.0 L194,27.9 L198,25.3 L202,25.3 L206,27.9 L210,33.0 L214,40.4 L218,49.7 L222,60.6 L226,72.5 L230,85.0 L234,97.5 L238,109.4 L242,120.3 L246,129.6 L250,137.0 L254,142.1 L258,144.7 L262,144.7 L266,142.1 L270,137.0 L274,129.6 L278,120.3 L282,109.4 L286,97.5 L290,85.0" fill="none" stroke="#1F6F6B" stroke-width="3"/>
+  <g font-size="12" fill="#2d3748"><text x="45" y="29" text-anchor="end">325 V</text><text x="45" y="149" text-anchor="end">−325 V</text><text x="45" y="89" text-anchor="end">0</text><text x="304" y="102" text-anchor="end">t</text><text x="56" y="14">U</text></g>
+</svg>`;
+
+const RES = (x, y, lab, vert) => vert
+  ? `<rect x="${x-7}" y="${y-18}" width="14" height="36" fill="#fff" stroke="#2d3748" stroke-width="2"/><text x="${x+12}" y="${y+4}" font-size="12" fill="#2d3748">${lab}</text>`
+  : `<rect x="${x-18}" y="${y-7}" width="36" height="14" fill="#fff" stroke="#2d3748" stroke-width="2"/><text x="${x}" y="${y-12}" font-size="12" fill="#2d3748" text-anchor="middle">${lab}</text>`;
+const KRUISEN = (x0, y0, nx, ny, d) => { let s = ""; for (let i = 0; i < nx; i++) for (let j = 0; j < ny; j++) s += `<text x="${x0+i*d}" y="${y0+j*d}" font-size="14" fill="#718096" text-anchor="middle">×</text>`; return s; };
+const PIJL = (x1, y1, x2, y2, kl) => { const a = Math.atan2(y2-y1, x2-x1), h = 9; return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${kl}" stroke-width="2.5"/><path d="M${x2},${y2} L${(x2-h*Math.cos(a-0.4)).toFixed(1)},${(y2-h*Math.sin(a-0.4)).toFixed(1)} L${(x2-h*Math.cos(a+0.4)).toFixed(1)},${(y2-h*Math.sin(a+0.4)).toFixed(1)}Z" fill="${kl}"/>`; };
+
+const FIG_SERIE = `<svg viewBox="0 0 320 160" width="320" role="img" aria-label="Batterij met twee lampjes A en B in serie.">
+  <path d="M40,85 V30 H106 M134,30 H186 M214,30 H285 V135 H40 V95" fill="none" stroke="#2d3748" stroke-width="2"/>
+  ${BATT(40, 90, "")}${LAMP(120, 30)}${LAMP(200, 30)}
+  <g font-size="13" fill="#2d3748" text-anchor="middle"><text x="120" y="62">A</text><text x="200" y="62">B</text></g>
+</svg>`;
+const FIG_KORT = `<svg viewBox="0 0 320 160" width="320" role="img" aria-label="Batterij met lampjes A en B in serie; een extra draad loopt van vlak vóór B naar vlak achter B, parallel aan B.">
+  <path d="M40,85 V30 H106 M134,30 H186 M214,30 H285 V135 H40 V95" fill="none" stroke="#2d3748" stroke-width="2"/>
+  <path d="M175,30 V6 H225 V30" fill="none" stroke="#1F6F6B" stroke-width="3"/>
+  <circle cx="175" cy="30" r="3.5" fill="#2d3748"/><circle cx="225" cy="30" r="3.5" fill="#2d3748"/>
+  ${BATT(40, 90, "")}${LAMP(120, 30)}${LAMP(200, 30)}
+  <g font-size="13" fill="#2d3748" text-anchor="middle"><text x="120" y="62">A</text><text x="200" y="62">B</text><text x="262" y="12" fill="#134A47">extra draad</text></g>
+</svg>`;
+const FIG_PARALLEL = `<svg viewBox="0 0 320 160" width="320" role="img" aria-label="Batterij met twee lampjes A en B parallel; in de tak van B zit een open schakelaar.">
+  <path d="M40,85 V30 H240 V56 M240,84 V96 M240,124 V135 H40 V95 M150,30 V66 M150,94 V135" fill="none" stroke="#2d3748" stroke-width="2"/>
+  <path d="M240,96 L256,120" stroke="#2d3748" stroke-width="2"/><circle cx="240" cy="96" r="3" fill="#2d3748"/><circle cx="240" cy="124" r="3" fill="#2d3748"/>
+  ${BATT(40, 90, "")}${LAMP(150, 80)}${LAMP(240, 70)}
+  <g font-size="13" fill="#2d3748"><text x="168" y="85">A</text><text x="258" y="75">B</text><text x="262" y="118" font-size="11" fill="#5F6B7A">schakelaar</text></g>
+</svg>`;
+const FIG_KNOOP = `<svg viewBox="0 0 320 150" width="320" role="img" aria-label="Knooppunt met drie draden: links komt 3 A binnen, rechtsboven gaat 1 A weg, rechtsonder loopt een onbekende stroom I3.">
+  <line x1="30" y1="75" x2="160" y2="75" stroke="#2d3748" stroke-width="2"/><line x1="160" y1="75" x2="290" y2="20" stroke="#2d3748" stroke-width="2"/><line x1="160" y1="75" x2="290" y2="130" stroke="#2d3748" stroke-width="2"/>
+  <circle cx="160" cy="75" r="5" fill="#2d3748"/>
+  ${PIJL(60, 75, 115, 75, "#1F6F6B")}${PIJL(205, 56, 255, 35, "#1F6F6B")}
+  <g font-size="14" fill="#134A47" font-weight="700"><text x="78" y="64">3 A</text><text x="222" y="30">1 A</text></g>
+  <text x="230" y="128" font-size="14" font-weight="700" fill="#3E1C4B">I₃ = ?</text>
+</svg>`;
+const FIG_NETWERK = `<svg viewBox="0 0 320 140" width="320" role="img" aria-label="Tussen A en B: een weerstand van 10 ohm in serie met twee parallelle weerstanden van elk 20 ohm.">
+  <path d="M25,70 H52 M88,70 H130 V40 H162 M198,40 H230 V70 H295 M130,70 V100 H162 M198,100 H230 V70" fill="none" stroke="#2d3748" stroke-width="2"/>
+  ${RES(70, 70, "10 Ω")}${RES(180, 40, "20 Ω")}${RES(180, 100, "20 Ω")}
+  <circle cx="25" cy="70" r="4" fill="#fff" stroke="#2d3748" stroke-width="2"/><circle cx="295" cy="70" r="4" fill="#fff" stroke="#2d3748" stroke-width="2"/>
+  <g font-size="14" font-weight="700" fill="#2d3748"><text x="14" y="96">A</text><text x="288" y="96">B</text></g>
+</svg>`;
+const FIG_DRAADVELD = `<svg viewBox="0 0 320 150" width="320" role="img" aria-label="Rechte draad naar rechts met stroom I in een homogeen magnetisch veld dat het papier in gericht is.">
+  ${KRUISEN(40, 30, 7, 1, 40)}${KRUISEN(40, 120, 7, 1, 40)}
+  <line x1="20" y1="80" x2="300" y2="80" stroke="#4A5568" stroke-width="7"/>${PIJL(130, 62, 190, 62, "#1F6F6B")}
+  <text x="198" y="68" font-size="16" font-style="italic" fill="#134A47">I</text>
+  <text x="300" y="146" font-size="12" fill="#2d3748" text-anchor="end">× = magnetisch veld het papier in</text>
+</svg>`;
+const FIG_RONDDRAAD = `<svg viewBox="0 0 320 160" width="320" role="img" aria-label="Bovenaanzicht van een draad met de stroom het papier uit, met een stippelcirkel eromheen.">
+  <circle cx="160" cy="80" r="55" fill="none" stroke="#cbd5e0" stroke-width="2" stroke-dasharray="5 5"/>
+  <circle cx="160" cy="80" r="12" fill="#fff" stroke="#2d3748" stroke-width="2"/><circle cx="160" cy="80" r="3.5" fill="#2d3748"/>
+  <text x="160" y="155" font-size="12" fill="#2d3748" text-anchor="middle">bovenaanzicht: stroom het papier uit (•)</text>
+</svg>`;
+const FIG_TWEEDRADEN = `<svg viewBox="0 0 320 150" width="320" role="img" aria-label="Twee evenwijdige draden naast elkaar, in beide loopt de stroom omhoog.">
+  <line x1="120" y1="135" x2="120" y2="15" stroke="#4A5568" stroke-width="6"/><line x1="200" y1="135" x2="200" y2="15" stroke="#4A5568" stroke-width="6"/>
+  ${PIJL(104, 100, 104, 50, "#1F6F6B")}${PIJL(216, 100, 216, 50, "#1F6F6B")}
+  <g font-size="16" font-style="italic" fill="#134A47"><text x="88" y="82">I</text><text x="224" y="82">I</text></g>
+</svg>`;
+const FIG_SPOEL = `<svg viewBox="0 0 320 170" width="320" role="img" aria-label="Een staafmagneet ligt stil in een spoel; de spoel is aangesloten op een stroommeter.">
+  <path d="M150,95 V140 H186 M214,140 H260 V95" fill="none" stroke="#2d3748" stroke-width="2"/>
+  <rect x="120" y="58" width="80" height="24" fill="#4A5568"/><rect x="200" y="58" width="80" height="24" fill="#CBD2DB" stroke="#4A5568"/>
+  <g font-size="14" font-weight="700" text-anchor="middle"><text x="160" y="75" fill="#fff">N</text><text x="240" y="75" fill="#2d3748">Z</text></g>
+  <g fill="none" stroke="#1F6F6B" stroke-width="3">${[150,165,180,195,210,225,240,255].map(x => `<ellipse cx="${x}" cy="70" rx="6" ry="25"/>`).join("")}</g>
+  ${METER(200, 140, "A")}
+  <text x="100" y="40" font-size="12" fill="#5F6B7A">magneet ligt stil in de spoel</text>
+</svg>`;
+const FIG_FLUX = `<svg viewBox="0 0 320 180" width="320" role="img" aria-label="Grafiek van de flux tegen de tijd: in interval I neemt de flux langzaam toe, in II blijft hij constant en hoog, in III neemt hij snel af tot nul.">
+  <g stroke="#2d3748" stroke-width="2"><line x1="40" y1="150" x2="300" y2="150"/><line x1="40" y1="150" x2="40" y2="15"/></g>
+  <g stroke="#cbd5e0" stroke-dasharray="4 4"><line x1="150" y1="20" x2="150" y2="150"/><line x1="230" y1="20" x2="230" y2="150"/><line x1="262" y1="20" x2="262" y2="150"/></g>
+  <path d="M40,150 L150,55 L230,55 L262,150" fill="none" stroke="#1F6F6B" stroke-width="3"/>
+  <g font-size="13" font-weight="700" fill="#3E1C4B" text-anchor="middle"><text x="95" y="40">I</text><text x="190" y="40">II</text><text x="246" y="40">III</text></g>
+  <g font-size="13" fill="#2d3748"><text x="300" y="170" text-anchor="end">t</text><text x="48" y="22">Φ</text></g>
+</svg>`;
+const FIG_RAILS = `<svg viewBox="0 0 320 160" width="320" role="img" aria-label="Twee rails met links een lampje; een staaf ligt dwars over de rails en beweegt naar rechts, in een magnetisch veld het papier in.">
+  ${KRUISEN(70, 62, 6, 2, 40)}
+  <path d="M40,40 H300 M40,120 H300 M40,40 V66 M40,94 V120" fill="none" stroke="#2d3748" stroke-width="3"/>
+  ${LAMP(40, 80)}
+  <line x1="190" y1="32" x2="190" y2="128" stroke="#4A5568" stroke-width="8"/>${PIJL(200, 150, 245, 150, "#1F6F6B")}
+  <text x="252" y="155" font-size="15" font-style="italic" fill="#134A47">v</text>
+  <text x="300" y="20" font-size="12" fill="#2d3748" text-anchor="end">× = veld het papier in</text>
+</svg>`;
+const KERN = `<rect x="70" y="25" width="180" height="120" fill="#CBD2DB" stroke="#4A5568" stroke-width="2"/><rect x="105" y="55" width="110" height="60" fill="#fff" stroke="#4A5568" stroke-width="2"/>
+  <g stroke="#1F6F6B" stroke-width="3">${[60,70,80,90,100,110].map(y => `<line x1="64" y1="${y}" x2="111" y2="${y+4}"/><line x1="209" y1="${y}" x2="256" y2="${y+4}"/>`).join("")}</g>`;
+const FIG_TRAFO = `<svg viewBox="0 0 320 170" width="320" role="img" aria-label="Transformator: ijzeren kern met links de primaire spoel van 460 windingen op 230 V en rechts de secundaire spoel van 24 windingen.">
+  ${KERN}
+  <path d="M64,60 H20 M64,114 H20 M256,60 H300 M256,114 H300" stroke="#2d3748" stroke-width="2" fill="none"/>
+  <g font-size="12" fill="#2d3748"><text x="16" y="91" text-anchor="start">230 V ~</text><text x="88" y="162" text-anchor="middle">Nₚ = 460</text><text x="232" y="162" text-anchor="middle">Nₛ = 24</text><text x="304" y="91" text-anchor="end">Uₛ = ?</text></g>
+</svg>`;
+const FIG_TRAFO_DC = `<svg viewBox="0 0 320 170" width="320" role="img" aria-label="Transformator met op de primaire spoel een batterij en een schakelaar, en op de secundaire spoel een voltmeter.">
+  ${KERN}
+  <path d="M64,60 H25 V78 M25,102 V114 H64 M256,60 H290 V74 M290,100 V114 H256" stroke="#2d3748" stroke-width="2" fill="none"/>
+  <line x1="13" y1="85" x2="37" y2="85" stroke="#2d3748" stroke-width="2"/><line x1="19" y1="95" x2="31" y2="95" stroke="#2d3748" stroke-width="5"/>
+  ${METER(290, 87, "V")}
+  <text x="40" y="160" font-size="12" fill="#2d3748">gelijkspanning</text>
+</svg>`;
+const FIG_GENERATOR = `<svg viewBox="0 0 320 170" width="320" role="img" aria-label="Sinusvormige spanning van een generator tegen de tijd. Punt P ligt op een top, punt Q op een nuldoorgang. Eén periode duurt 20 ms.">
+  <g stroke="#2d3748" stroke-width="2"><line x1="40" y1="80" x2="305" y2="80"/><line x1="40" y1="150" x2="40" y2="10"/></g>
+  <path d="M40,80.0 L44,68.6 L48,57.6 L52,47.7 L56,39.1 L60,32.4 L64,27.7 L68,25.3 L72,25.3 L76,27.7 L80,32.4 L84,39.1 L88,47.7 L92,57.6 L96,68.6 L100,80.0 L104,91.4 L108,102.4 L112,112.3 L116,120.9 L120,127.6 L124,132.3 L128,134.7 L132,134.7 L136,132.3 L140,127.6 L144,120.9 L148,112.3 L152,102.4 L156,91.4 L160,80.0 L164,68.6 L168,57.6 L172,47.7 L176,39.1 L180,32.4 L184,27.7 L188,25.3 L192,25.3 L196,27.7 L200,32.4 L204,39.1 L208,47.7 L212,57.6 L216,68.6 L220,80.0 L224,91.4 L228,102.4 L232,112.3 L236,120.9 L240,127.6 L244,132.3 L248,134.7 L252,134.7 L256,132.3 L260,127.6 L264,120.9 L268,112.3 L272,102.4 L276,91.4 L280,80.0 L284,68.6 L288,57.6 L292,47.7 L296,39.1 L300,32.4" fill="none" stroke="#1F6F6B" stroke-width="3"/>
+  <circle cx="70" cy="25" r="5" fill="#5B2A6E"/><circle cx="100" cy="80" r="5" fill="#5B2A6E"/>
+  <g font-size="13" font-weight="700" fill="#3E1C4B"><text x="76" y="22">P</text><text x="104" y="98">Q</text></g>
+  <path d="M40,158 H160" stroke="#2d3748" stroke-width="1.5"/><path d="M40,152 V164 M160,152 V164" stroke="#2d3748" stroke-width="1.5"/>
+  <text x="100" y="152" font-size="12" fill="#2d3748" text-anchor="middle">20 ms</text>
+  <g font-size="13" fill="#2d3748"><text x="304" y="98" text-anchor="end">t</text><text x="46" y="16">U</text></g>
+</svg>`;
+
+const Q = [
+  // ---------- Week 1: Lading en elektrisch veld ----------
+  { id: "w1-01", w: 1, s: "kennis", t: "mc", par: "18.1",
+    q: "Hoe groot is de lading van één elektron?",
+    o: ["−1,60 · 10⁻¹⁹ C", "+1,60 · 10⁻¹⁹ C", "−9,11 · 10⁻³¹ C", "−1 C"],
+    why: "De elementaire lading is e = 1,60 · 10⁻¹⁹ C. Een elektron heeft lading −e, een proton +e. Het getal 9,11 · 10⁻³¹ is de massa van een elektron in kg." },
+  { id: "w1-02", w: 1, s: "kennis", t: "koppel", par: "18.1–18.5",
+    q: "Koppel elke grootheid aan haar eenheid.",
+    pairs: [["lading q", "coulomb (C)"], ["kracht F", "newton (N)"], ["afstand r", "meter (m)"], ["constante van Coulomb k", "N·m²/C²"]],
+    why: "Lading in coulomb, kracht in newton, afstand in meter. De eenheid van k volgt uit F = k·q₁·q₂/r²: k = F·r²/(q₁·q₂), dus N·m²/C²." },
+  { id: "w1-03", w: 1, s: "kennis", t: "mc", par: "18.5",
+    q: "Hoe heet de constante ε₀ (8,85 · 10⁻¹² C²/(N·m²))?",
+    o: ["De elektrische veldconstante (permittiviteit van het vacuüm)", "De constante van Coulomb", "De magnetische veldconstante", "De elementaire lading"],
+    why: "ε₀ is de elektrische veldconstante, in het Engels permittivity of free space. De constante van Coulomb is k = 1/(4πε₀) = 8,99 · 10⁹ N·m²/C². De magnetische veldconstante is μ₀ (H21)." },
+  { id: "w1-04", w: 1, s: "kennis", t: "koppel", par: "18.1–18.4",
+    q: "Koppel elk Nederlands begrip aan de term in het boek.",
+    pairs: [["lading", "charge"], ["geleider", "conductor"], ["isolator", "insulator"], ["laden door influentie", "charging by induction"]],
+    why: "Let op: het boek zegt 'induction' waar wij 'influentie' zeggen. 'Inductie' gebruiken we in het Nederlands voor H22 (een veranderend magnetisch veld wekt een spanning op)." },
+  { id: "w1-05", w: 1, s: "begrip", t: "mc", par: "18.1–18.2",
+    q: "Je wrijft een plastic staaf met een wollen doek. De staaf wordt negatief geladen. Wat is er gebeurd?",
+    o: ["Er zijn elektronen van de doek naar de staaf gegaan.", "Er zijn positieve ladingen van de staaf naar de doek gegaan.", "Door het wrijven is er negatieve lading in de staaf ontstaan.", "Er zijn protonen van de staaf naar de doek gegaan."],
+    why: "Lading wordt niet gemaakt, maar verplaatst (behoud van lading). In vaste stoffen zitten de protonen vast in de atoomkernen; alleen elektronen gaan over. De staaf heeft er elektronen bij, de doek evenveel minder: de doek is even sterk positief.",
+    mis: "Lading is een soort stof die je bij het wrijven 'opsmeert' of maakt. Vraag bij wrijven altijd: wát gaat van waar naar waar?",
+    elektra: "Waarom gaan er bij wrijven elektronen over en geen protonen?" },
+  { id: "w1-06", w: 1, s: "begrip", t: "twee", par: "18.3",
+    q: "Kun je een isolator, zoals een ballon, elektrisch laden?",
+    o: ["Ja", "Nee"],
+    r: ["De lading kan in een isolator niet wegstromen, dus blijft ze zitten waar ze terechtkwam.",
+        "In een isolator kunnen geen elektronen bewegen, dus kan er ook geen lading bij komen of af gaan.",
+        "Alleen als je de isolator eerst aardt."],
+    why: "Juist isolatoren houden lading goed vast: wat er bij het wrijven op komt, kan niet weglopen. Een metalen staaf in je hand laadt je niet merkbaar op, omdat de lading via je lichaam wegstroomt. Met een isolerend handvat lukt het wel.",
+    mis: "Isolatoren kunnen niet geladen worden. Diagnose: vergelijk een gewreven ballon met een gewreven metalen staaf, met en zonder handvat.",
+    elektra: "Waarom kun je een ballon wel laden en een metalen staaf in je hand niet?" },
+  { id: "w1-07", w: 1, s: "begrip", t: "mc", par: "18.1",
+    q: "Een metalen bol is elektrisch neutraal. Wat betekent dat?",
+    o: ["Er zitten evenveel positieve als negatieve ladingen in.", "Er zitten geen ladingen in.", "Er zit een derde, neutrale soort lading in.", "Er zitten alleen neutronen in."],
+    why: "Neutraal betekent: de netto lading is nul. De bol bevat enorm veel protonen en elektronen, precies evenveel van elk.",
+    mis: "'Neutraal' als een derde soort lading. Laat leerlingen een neutraal voorwerp tekenen met + en −: een leeg voorwerp tekenen verraadt dit denkbeeld." },
+  { id: "w1-08", w: 1, s: "begrip", t: "twee", par: "18.4",
+    q: "Je houdt een negatief geladen pen bij kleine, ongeladen papiersnippers. Wat gebeurt er?",
+    o: ["De snippers worden aangetrokken.", "Er gebeurt niets.", "De snippers worden afgestoten."],
+    r: ["De pen verschuift de lading in de snippers een beetje; de positieve kant komt dichterbij en wordt sterker aangetrokken dan de negatieve kant wordt afgestoten.",
+        "Een geladen voorwerp oefent alleen een kracht uit op een ander geladen voorwerp.",
+        "De pen geeft elektronen af aan de snippers, zodat ze dezelfde lading krijgen."],
+    why: "In de snippers verschuift de lading een klein beetje (polarisatie). De kant met tegengestelde lading ligt dichter bij de pen. Omdat de kracht sterk afneemt met de afstand, wint de aantrekking het van de afstoting: netto worden de snippers aangetrokken.",
+    mis: "Een geladen voorwerp trekt alleen tegengestelde lading aan, geen neutraal voorwerp.",
+    elektra: "Waarom trekt een geladen pen ongeladen papiersnippers aan?" },
+  { id: "w1-09", w: 1, s: "begrip", t: "mc", par: "18.4", fig: FIG_INFLUENTIE,
+    q: "Je houdt een negatief geladen staaf bij een neutrale metalen bol op een isolerende voet, zonder de bol aan te raken. Je raakt de bol even aan met je vinger. Daarna haal je eerst je vinger weg en dan de staaf. Welke lading heeft de bol nu?",
+    o: ["Positief", "Negatief", "Neutraal"],
+    why: "De staaf stoot elektronen in de bol af. Via je vinger kunnen ze wegstromen naar de aarde. Haal je eerst je vinger weg, dan kunnen ze niet meer terug: de bol heeft een tekort aan elektronen en is positief. De bol krijgt dus de tegengestelde lading van de staaf.",
+    mis: "Bij influentie komt er lading van de staaf bij, dus krijgt de bol dezelfde lading als de staaf.",
+    elektra: "Leg stap voor stap uit hoe je een bol positief laadt met een negatieve staaf, via influentie." },
+  { id: "w1-10", w: 1, s: "begrip", t: "twee", par: "18.4", fig: FIG_INFLUENTIE,
+    q: "Dezelfde opstelling, maar nu raak je de bol niet aan. Je haalt de staaf weer weg. Welke lading heeft de bol dan?",
+    o: ["Neutraal", "Positief", "Negatief"],
+    r: ["De elektronen in de bol zijn alleen verschoven; er is geen lading bij gekomen of weggegaan.",
+        "De staaf heeft positieve lading in de bol opgewekt.",
+        "Er is lading van de staaf naar de bol overgesprongen."],
+    why: "Zolang de staaf in de buurt is, zijn de elektronen in de bol naar de verre kant geduwd. Er gaat niets in of uit. Haal je de staaf weg, dan verdelen ze zich weer gelijk en is de bol neutraal. Om netto te laden via influentie is aarden nodig.",
+    mis: "Influentie betekent dat er lading bij komt. In werkelijkheid is het ladingsscheiding binnen een neutraal voorwerp." },
+  { id: "w1-11", w: 1, s: "begrip", t: "mc", par: "18.5",
+    q: "Lading A is +q en lading B is +3q. Hoe verhoudt de kracht van A op B zich tot de kracht van B op A?",
+    o: ["Ze zijn even groot (en tegengesteld gericht).", "De kracht op A is 3× zo groot.", "De kracht op B is 3× zo groot.", "De kracht op A is 9× zo groot."],
+    why: "In F = k·q₁·q₂/r² komen beide ladingen voor: het is één kracht tussen twee ladingen. Volgens de derde wet van Newton zijn de krachten op A en op B even groot en tegengesteld. Wel krijgt een lichter voorwerp door dezelfde kracht een grotere versnelling.",
+    mis: "De grotere lading oefent een grotere kracht uit dan ze zelf ondervindt.",
+    elektra: "Waarom oefenen ladingen q en 3q een even grote kracht op elkaar uit?" },
+  { id: "w1-12", w: 1, s: "reken", t: "mc", par: "18.5",
+    q: "Twee puntladingen oefenen een kracht F op elkaar uit. Je maakt de afstand twee keer zo groot. Hoe groot wordt de kracht?",
+    o: ["F/4", "F/2", "2F", "4F"],
+    why: "De kracht is omgekeerd evenredig met r². Twee keer zo ver weg: 2² = 4 keer zo klein, dus F/4.",
+    mis: "Lineair denken: twee keer zo ver, half zo sterk (het kwadraat vergeten)." },
+  { id: "w1-13", w: 1, s: "reken", t: "mc", par: "18.5",
+    q: "Twee puntladingen oefenen een kracht F op elkaar uit. Je maakt beide ladingen twee keer zo groot én de afstand twee keer zo groot. Hoe groot wordt de kracht?",
+    o: ["F", "2F", "F/2", "4F"],
+    why: "De teller wordt 2 · 2 = 4 keer zo groot, de noemer r² ook 4 keer zo groot. Samen: de kracht blijft F." },
+  { id: "w1-14", w: 1, s: "reken", t: "mc", par: "18.1",
+    q: "Een voorwerp heeft een lading van −1,6 · 10⁻¹⁸ C. Hoeveel elektronen heeft het te veel?",
+    o: ["10", "100", "1", "16"],
+    why: "Aantal = lading / e = 1,6 · 10⁻¹⁸ / 1,6 · 10⁻¹⁹ = 10." },
+  { id: "w1-15", w: 1, s: "reken", t: "mc", par: "18.7",
+    q: "In een tekening vertrekken 8 veldlijnen uit een lading van +2 µC. Hoeveel veldlijnen horen er bij een lading van −4 µC in dezelfde tekening?",
+    o: ["16, die eindigen op de lading", "16, die vertrekken uit de lading", "8, die eindigen op de lading", "4, die eindigen op de lading"],
+    why: "Het aantal veldlijnen is evenredig met de grootte van de lading: twee keer zoveel lading, twee keer zoveel lijnen. Veldlijnen beginnen bij positieve en eindigen bij negatieve lading." },
+  { id: "w1-16", w: 1, s: "begrip", t: "mc", par: "18.7",
+    q: "Waarom kunnen twee elektrische veldlijnen elkaar nooit snijden?",
+    o: ["Op elk punt heeft het elektrische veld maar één richting.", "Veldlijnen stoten elkaar af, net als gelijke ladingen.", "Op een snijpunt zou het veld oneindig groot worden.", "Dat kan wel, bijvoorbeeld tussen twee positieve ladingen."],
+    why: "Een veldlijn geeft in elk punt de richting van het veld. Bij een snijpunt zou het veld daar twee richtingen hebben, en dat kan niet: de bijdragen van alle ladingen tellen op tot één veld met één richting." },
+  { id: "w1-17", w: 1, s: "begrip", t: "mc", par: "18.7",
+    q: "Waar is het elektrische veld het sterkst in een veldlijnenpatroon?",
+    o: ["Waar de veldlijnen het dichtst bij elkaar liggen.", "Waar de veldlijnen het verst uit elkaar liggen.", "Alleen óp de veldlijnen; ertussen is er geen veld.", "Overal even sterk; de lijnen geven alleen de richting."],
+    why: "De dichtheid van de lijnen is een maat voor de veldsterkte. Het veld bestaat ook tussen de getekende lijnen: je tekent er maar een paar.",
+    mis: "Het veld bestaat alleen op de getekende lijnen." },
+  { id: "w1-18", w: 1, s: "begrip", t: "twee", par: "18.7",
+    q: "Een klein, positief geladen deeltje ligt stil op een gebogen veldlijn tussen een positieve en een negatieve lading. Je laat het los. Volgt het deeltje precies die veldlijn?",
+    o: ["Nee", "Ja"],
+    r: ["De kracht wijst langs de veldlijn, maar het deeltje krijgt snelheid en neemt die mee de bocht in: de baan wijkt naar buiten af.",
+        "Een veldlijn is per definitie de baan die een lading volgt.",
+        "Het deeltje beweegt loodrecht op de veldlijn."],
+    why: "Een veldlijn geeft de richting van de kracht, niet van de snelheid. Bij een rechte veldlijn valt de baan samen met de lijn, maar bij een gebogen lijn 'schiet' het deeltje door zijn snelheid uit de bocht.",
+    mis: "Veldlijnen zijn de banen van ladingen.",
+    elektra: "Waarom volgt een geladen deeltje een gebogen veldlijn niet precies?" },
+  { id: "w1-19", w: 1, s: "begrip", t: "mc", par: "18.3",
+    q: "Waarom geleidt een metaal lading goed en plastic niet?",
+    o: ["In een metaal kunnen sommige elektronen vrij bewegen; in plastic zitten ze vast aan hun atomen.", "Een metaal bevat meer elektronen dan plastic.", "In plastic zitten geen elektronen.", "In een metaal bewegen de protonen mee."],
+    why: "Het verschil zit niet in het aantal elektronen, maar in hoe vast ze zitten. In een metaal zijn de buitenste elektronen vrij; in een isolator zitten alle elektronen aan hun atoom gebonden. Zie ook de applet over geleiding (week 2)." },
+  { id: "w1-21", w: 1, s: "begrip", t: "mc", par: "18.2 en 18.4", fig: FIG_BOLLETJES,
+    q: "Bolletje A is positief. A en B stoten elkaar af; B en C trekken elkaar aan (zie de tekening). Wat weet je over de lading van C?",
+    o: ["C is negatief of neutraal.", "C is negatief.", "C is positief.", "C is neutraal."],
+    why: "Afstoten kan alleen bij gelijke lading, dus B is positief. Een positief bolletje trekt een negatief bolletje aan, maar ook een neutraal bolletje: in C verschuift de lading een beetje (polarisatie). Uit aantrekking alleen kun je dus niet concluderen dat C negatief is.",
+    mis: "Aantrekking betekent altijd tegengestelde lading. Alleen afstoting bewijst dat een voorwerp geladen is.",
+    elektra: "Waarom bewijst afstoting wel dat een voorwerp geladen is en aantrekking niet?" },
+  { id: "w1-22", w: 1, s: "begrip", t: "mc", par: "18.7", fig: FIG_VELD,
+    q: "Bij welke twee ladingen hoort dit veldlijnenpatroon?",
+    o: ["Twee even grote positieve ladingen", "Een positieve en een even grote negatieve lading", "Twee even grote negatieve ladingen", "Een grote en een kleine positieve lading"],
+    why: "De pijlen wijzen van beide ladingen af: beide zijn positief. Er lopen geen lijnen van de ene naar de andere lading, en het patroon is symmetrisch met evenveel lijnen per lading: ze zijn even groot. Bij een + en een − zouden de lijnen van de ene naar de andere lading lopen." },
+  { id: "w1-23", w: 1, s: "begrip", t: "mc", par: "18.5", fig: FIG_DRIE,
+    q: "Drie ladingen liggen op één lijn, op gelijke afstanden (zie de tekening). Welke richting heeft de netto elektrische kracht op de middelste lading?",
+    o: ["Naar links", "Naar rechts", "De netto kracht is nul.", "Loodrecht op de lijn"],
+    why: "De −q links trekt de middelste +q naar links. De +q rechts stoot de middelste +q af, ook naar links. Beide krachten zijn even groot en wijzen dezelfde kant op: de netto kracht wijst naar links.",
+    mis: "De krachten heffen elkaar op omdat de afstanden gelijk zijn (zonder naar de tekens te kijken)." },
+  { id: "w1-20", w: 1, s: "kennis", t: "mc", par: null,
+    q: "Het woord elektriciteit komt van het Griekse ēlektron. Wat betekent dat?",
+    o: ["Barnsteen", "Bliksem", "Vonk", "Wrijven"],
+    why: "Ēlektron is barnsteen. Al in de oudheid zag men dat gewreven barnsteen lichte dingen aantrekt." },
+  // ---------- Week 2: Spanning en stroomsterkte ----------
+  { id: "w2-01", w: 2, s: "kennis", t: "koppel", par: "20.1–20.4",
+    q: "Koppel elke grootheid aan haar eenheid.",
+    pairs: [["spanning U", "volt (V)"], ["stroomsterkte I", "ampère (A)"], ["weerstand R", "ohm (Ω)"], ["vermogen P", "watt (W)"]],
+    why: "Let op: het boek gebruikt V voor spanning. Wij schrijven U, zodat het symbool niet hetzelfde is als de eenheid volt." },
+  { id: "w2-02", w: 2, s: "kennis", t: "koppel", par: "20.1–20.4",
+    q: "Koppel elke eenheid aan wat ze betekent.",
+    pairs: [["1 V", "1 J/C"], ["1 A", "1 C/s"], ["1 W", "1 J/s"], ["1 Ω", "1 V/A"]],
+    why: "Spanning is energie per lading (J/C), stroomsterkte is lading per seconde (C/s), vermogen is energie per seconde (J/s) en weerstand is spanning per stroom (V/A)." },
+  { id: "w2-03", w: 2, s: "kennis", t: "mc", par: "20.1",
+    q: "Welke Engelse term gebruikt het boek voor de bronspanning van een batterij?",
+    o: ["emf (electromotive force)", "voltage drop", "current", "resistivity"],
+    why: "Emf (elektromotorische kracht, emk) is de bronspanning: de energie die de bron per coulomb lading levert. Het is geen kracht, ondanks de naam. Het boek gebruikt het symbool V; wij schrijven U." },
+  { id: "w2-04", w: 2, s: "begrip", t: "twee", par: "20.1", fig: FIG_AMPERE,
+    q: "Ampèremeter A₁ vóór het lampje meet 0,30 A. Wat meet ampèremeter A₂ achter het lampje?",
+    o: ["0,30 A", "Minder dan 0,30 A", "Meer dan 0,30 A"],
+    r: ["Lading wordt niet verbruikt: alle lading die het lampje in gaat, komt er ook weer uit.",
+        "Het lampje verbruikt een deel van de stroom om licht te geven.",
+        "Achter het lampje is de spanning lager, dus is ook de stroom kleiner."],
+    why: "Stroom is lading per seconde. Er verdwijnt geen lading in het lampje, dus overal in deze kring is de stroom even groot. Wat het lampje 'verbruikt', is energie: elke coulomb levert daar energie af (de spanning over het lampje).",
+    mis: "Stroom wordt verbruikt in een lampje. Laat leerlingen voorspellen wat een ampèremeter vóór en achter het lampje aanwijst, en meet het daarna.",
+    elektra: "Waarom is de stroom vóór en achter een lampje even groot, terwijl het lampje wel energie gebruikt?" },
+  { id: "w2-05", w: 2, s: "begrip", t: "mc", par: "20.1", fig: FIG_OPEN,
+    q: "De schakelaar is open. Wat wijst de voltmeter over de open schakelaar aan?",
+    o: ["9 V", "0 V", "4,5 V"],
+    why: "Er loopt geen stroom, dus staat er over het lampje geen spanning (U = I·R = 0). De volledige bronspanning van 9 V staat daarom over de opening in de schakelaar.",
+    mis: "Spanning bestaat pas als er een stroom loopt. Een batterij zonder stroom heeft wel degelijk spanning.",
+    elektra: "Waarom staat er over een open schakelaar de volle bronspanning?" },
+  { id: "w2-06", w: 2, s: "begrip", t: "mc", par: "20.1",
+    q: "Wat is het verschil tussen spanning en stroomsterkte?",
+    o: ["Spanning is energie per lading tussen twee punten; stroomsterkte is lading per seconde door één punt.",
+        "Spanning is de hoeveelheid stroom die een batterij kan leveren.",
+        "Stroom is de snelheid waarmee de spanning door de draad gaat.",
+        "Het is hetzelfde, maar met een andere eenheid."],
+    why: "Spanning staat óver iets (tussen twee punten), stroom gaat dóór iets (door één punt). Dat zie je ook aan het meten: een voltmeter zet je parallel, een ampèremeter in serie.",
+    mis: "Stroom en spanning worden door elkaar gehaald. Laat leerlingen consequent zeggen: spanning óver, stroom dóór." },
+  { id: "w2-07", w: 2, s: "begrip", t: "mc", par: "20.1",
+    q: "Waar komen de elektronen vandaan die door een lampje stromen als je het op een batterij aansluit?",
+    o: ["Ze zitten al in de draden en het lampje; de batterij zet ze in beweging.",
+        "Uit de batterij, die een voorraad elektronen bevat.",
+        "Ze ontstaan in de batterij door een chemische reactie.",
+        "Uit de lucht rond de draden."],
+    why: "Een metaal zit vol vrije elektronen. De batterij levert energie en zet die elektronen in de hele kring in beweging. Een batterij is dus een energiebron, geen opslag van lading: hij raakt 'leeg' als de chemische energie op is.",
+    mis: "Een batterij is een voorraad elektronen (of 'stroom').",
+    elektra: "Is een batterij een opslag van lading of van energie?" },
+  { id: "w2-08", w: 2, s: "reken", t: "mc", par: "20.2",
+    q: "Over een weerstand van 20 Ω staat een spanning van 6,0 V. Hoe groot is de stroom?",
+    o: ["0,30 A", "120 A", "3,3 A", "0,030 A"],
+    why: "I = U/R = 6,0/20 = 0,30 A. Wie U en R vermenigvuldigt, krijgt 120; wie R/U doet, krijgt 3,3." },
+  { id: "w2-09", w: 2, s: "begrip", t: "mc", par: "20.2", fig: FIG_UI,
+    q: "In het diagram staan de lijnen van weerstand A en weerstand B. Welke weerstand is het grootst?",
+    o: ["B", "A", "Ze zijn even groot."],
+    why: "R = U/I. Kies één spanning: bij B hoort dan een kleinere stroom dan bij A. Minder stroom bij dezelfde spanning betekent een grotere weerstand. Let op de assen: hier staat I verticaal, dus de steilste lijn hoort bij de kleinste weerstand.",
+    mis: "Een steilere lijn betekent altijd een grotere weerstand (zonder naar de assen te kijken)." },
+  { id: "w2-10", w: 2, s: "begrip", t: "mc", par: "20.3",
+    q: "Hoe ziet het (U,I)-diagram van een gloeilamp eruit, met U horizontaal en I verticaal?",
+    o: ["Een kromme die steeds minder steil oploopt", "Een rechte lijn door de oorsprong", "Een kromme die steeds steiler oploopt", "Een horizontale lijn"],
+    why: "Bij een grotere spanning wordt de gloeidraad heter. De weerstand van wolfraam stijgt dan sterk, zodat de stroom steeds minder toeneemt. De lijn buigt dus af naar de U-as.",
+    mis: "De weerstand van een lampje is constant." },
+  { id: "w2-11", w: 2, s: "reken", t: "mc", par: "20.3",
+    q: "Een draad heeft een weerstand R. Een tweede draad van hetzelfde materiaal is twee keer zo lang en heeft een twee keer zo grote diameter. Hoe groot is zijn weerstand?",
+    o: ["R/2", "R", "2R", "4R"],
+    why: "R = ρ·L/A. De lengte wordt 2 keer zo groot. Een 2 keer zo grote diameter maakt de doorsnede A 4 keer zo groot. Samen: 2/4, dus R/2.",
+    mis: "Diameter en doorsnede verwarren: twee keer zo dik lijkt dan twee keer zo veel ruimte voor stroom." },
+  { id: "w2-12", w: 2, s: "kennis", t: "mc", par: "20.3",
+    q: "Voor de soortelijke weerstand geldt ρ = ρ₀·[1 + α·(T − T₀)]. Van een materiaal is α kleiner dan nul. Wat voor weerstand kun je ervan maken?",
+    o: ["Een NTC", "Een PTC", "Een ohmse weerstand"],
+    why: "Bij α < 0 wordt ρ kleiner als de temperatuur stijgt: een negatieve temperatuurcoëfficiënt, dus een NTC. Bij α > 0 (metalen) neemt de weerstand toe: PTC. Een ohmse weerstand houdt bij verschillende temperaturen (vrijwel) dezelfde weerstand: α ≈ 0." },
+  { id: "w2-13", w: 2, s: "kennis", t: "koppel", par: "20.3",
+    q: "Koppel de temperatuurcoëfficiënt α aan het soort weerstand.",
+    pairs: [["α > 0", "PTC, bijvoorbeeld een metaaldraad"], ["α < 0", "NTC, een halfgeleider"], ["α ≈ 0", "ohmse weerstand, bijvoorbeeld constantaan"]],
+    why: "PTC en NTC staan voor positieve en negatieve temperatuurcoëfficiënt. Constantaan is een legering die juist gekozen wordt omdat de weerstand nauwelijks van de temperatuur afhangt." },
+  { id: "w2-14", w: 2, s: "kennis", t: "mc", par: "20.3",
+    q: "Een NTC-weerstand wordt warmer. Wat gebeurt er met zijn weerstand?",
+    o: ["Die wordt kleiner.", "Die wordt groter.", "Die blijft gelijk."],
+    why: "NTC staat voor negatieve temperatuurcoëfficiënt: de weerstand neemt af als de temperatuur stijgt. Een NTC is een halfgeleider; bij een hogere temperatuur komen er meer vrije ladingsdragers. Je ziet dit in de applet over geleiding." },
+  { id: "w2-15", w: 2, s: "begrip", t: "mc", par: "20.3",
+    q: "Waarom neemt de weerstand van een metaaldraad toe als hij warmer wordt?",
+    o: ["De ionen in het rooster trillen sterker, zodat de vrije elektronen vaker botsen.",
+        "Er komen minder vrije elektronen.",
+        "De draad zet uit en wordt langer; dat is de belangrijkste oorzaak.",
+        "Warme elektronen bewegen langzamer."],
+    why: "In een metaal verandert het aantal vrije elektronen nauwelijks. Bij een hogere temperatuur trillen de ionen harder en botsen de elektronen vaker, waardoor ze minder makkelijk opschuiven. De uitzetting van de draad speelt maar een heel kleine rol." },
+  { id: "w2-16", w: 2, s: "reken", t: "mc", par: "20.4",
+    q: "Door een lampje op 12 V loopt een stroom van 0,50 A. Hoe groot is het vermogen?",
+    o: ["6,0 W", "24 W", "0,042 W", "12,5 W"],
+    why: "P = U·I = 12 · 0,50 = 6,0 W." },
+  { id: "w2-17", w: 2, s: "reken", t: "mc", par: "20.4",
+    q: "Een waterkoker van 2000 W staat 3 minuten aan. Hoeveel energie gebruikt hij, in kWh?",
+    o: ["0,1 kWh", "6 kWh", "0,6 kWh", "100 kWh"],
+    why: "E = P·t = 2 kW · 0,05 h = 0,1 kWh. Drie minuten is 3/60 = 0,05 uur. Wie met 3 (minuten) rekent, komt op 6." },
+  { id: "w2-18", w: 2, s: "begrip", t: "twee", par: "20.4",
+    q: "Je sluit een weerstand van 10 Ω en een weerstand van 20 Ω elk afzonderlijk aan op dezelfde batterij. In welke weerstand wordt het grootste vermogen omgezet?",
+    o: ["In de weerstand van 10 Ω", "In de weerstand van 20 Ω", "In beide even veel"],
+    r: ["Bij dezelfde spanning geldt P = U²/R: een kleinere weerstand laat meer stroom door en zet meer vermogen om.",
+        "Volgens P = I²R hoort bij een grotere weerstand een groter vermogen.",
+        "Het vermogen hangt alleen af van de spanning van de batterij."],
+    why: "De spanning is in beide gevallen gelijk. Dan is P = U²/R het handigst: halve weerstand, dubbel vermogen. P = I²R geldt ook, maar de stroom is niet gelijk: door 10 Ω loopt twee keer zoveel stroom.",
+    mis: "Een grotere weerstand betekent altijd meer (of altijd minder) vermogen. Het hangt af van wat er gelijk blijft: de stroom (serie) of de spanning.",
+    elektra: "Wanneer gebruik je P = I²R en wanneer P = U²/R om vermogens te vergelijken?" },
+  { id: "w2-19", w: 2, s: "reken", t: "mc", par: "20.5", fig: FIG_SINUS,
+    q: "De netspanning heeft een piekwaarde van 325 V (zie de grafiek). Hoe groot is de effectieve waarde?",
+    o: ["230 V", "325 V", "163 V", "0 V"],
+    why: "Ueff = Umax/√2 = 325/1,41 ≈ 230 V. De helft (163 V) is fout: de factor is √2, niet 2. Het gemiddelde over een hele periode is 0 V, maar dat is niet de effectieve waarde.",
+    mis: "De effectieve waarde is het gemiddelde van de wisselspanning." },
+  { id: "w2-20", w: 2, s: "begrip", t: "mc", par: "20.5",
+    q: "Wat betekent het dat de netspanning 'effectief 230 V' is?",
+    o: ["Een weerstand zet gemiddeld hetzelfde vermogen om als bij een gelijkspanning van 230 V.",
+        "Het gemiddelde van de spanning over een periode is 230 V.",
+        "De spanning is meestal 230 V en piekt soms hoger.",
+        "De maximale spanning is 230 V."],
+    why: "De effectieve waarde is gedefinieerd via het vermogen: een kachel op 230 V wisselspanning wordt even warm als op 230 V gelijkspanning. De spanning zelf wisselt voortdurend tussen +325 V en −325 V." },
+  { id: "w2-21", w: 2, s: "kennis", t: "mc", par: "20.5",
+    q: "Wat is de frequentie van de netspanning in Nederland?",
+    o: ["50 Hz", "60 Hz", "230 Hz", "1 Hz"],
+    why: "In Nederland en de rest van Europa is dat 50 Hz, bij 230 V. Het boek is Amerikaans en rekent vaak met 120 V en 60 Hz." },
+  // ---------- Week 3: Schakelingen ----------
+  { id: "w3-01", w: 3, s: "begrip", t: "mc", par: "20.6",
+    q: "Hoe loopt de stroom in een kring met een batterij en een lampje?",
+    o: ["Eén stroom rond: uit de ene pool, door het lampje en via de andere draad terug naar de andere pool.",
+        "Uit beide polen naar het lampje, waar de twee stromen botsen.",
+        "Alleen van de pluspool naar het lampje; de tweede draad is er voor de veiligheid.",
+        "Door één draad heen en door dezelfde draad weer terug."],
+    why: "In een gesloten kring loopt één kringstroom, overal even groot. Zonder tweede draad is de kring niet gesloten en brandt het lampje niet.",
+    mis: "Het botsende-stroommodel (stroom uit beide polen) en het unipolaire model (één draad is genoeg). Laat leerlingen voorspellen of een lampje met één draad brandt.",
+    elektra: "Waarom heb je twee draden nodig om een lampje te laten branden?" },
+  { id: "w3-02", w: 3, s: "begrip", t: "mc", par: "20.6", fig: FIG_SERIE,
+    q: "Lampjes A en B zijn gelijk en staan in serie. Welk lampje brandt het felst?",
+    o: ["Ze branden even fel.", "A, want de stroom komt daar eerst langs.", "B, want daar komt de stroom het laatst aan."],
+    why: "In een serieschakeling loopt door elk onderdeel dezelfde stroom. Gelijke lampjes met dezelfde stroom branden even fel. De volgorde maakt niet uit.",
+    mis: "Sequentieel redeneren of het verzwakkingsmodel: de stroom raakt onderweg op." },
+  { id: "w3-03", w: 3, s: "begrip", t: "twee", par: "20.6",
+    q: "Een lampje brandt op een batterij. Je zet een tweede, gelijk lampje in serie erbij. Wat gebeurt er met de helderheid van het eerste lampje?",
+    o: ["Het brandt zwakker.", "Het brandt even fel.", "Het brandt feller."],
+    r: ["De totale weerstand wordt groter, dus de stroom uit de batterij wordt kleiner.",
+        "De batterij levert een vaste stroom, die nu over twee lampjes verdeeld wordt.",
+        "Elk lampje krijgt nog steeds de volle spanning van de batterij."],
+    why: "De batterij levert (ongeveer) een vaste spanning, geen vaste stroom. Met twee lampjes in serie is de weerstand twee keer zo groot, dus de stroom half zo groot. Elk lampje krijgt de halve spanning en brandt zwakker.",
+    mis: "Het delingsmodel: de batterij levert een vaste stroom die de lampjes 'delen'. Dat geeft hier toevallig het goede antwoord, maar om de verkeerde reden.",
+    elektra: "Levert een batterij een vaste stroom of een vaste spanning?" },
+  { id: "w3-04", w: 3, s: "begrip", t: "twee", par: "20.7", fig: FIG_PARALLEL,
+    q: "Lampjes A en B zijn gelijk en staan parallel op een (ideale) batterij. De schakelaar bij B is open, dus alleen A brandt. Je sluit de schakelaar. Wat gebeurt er met lampje A?",
+    o: ["A blijft even fel branden.", "A gaat zwakker branden.", "A gaat feller branden."],
+    r: ["Over A staat nog steeds de volle bronspanning; de batterij levert gewoon meer stroom.",
+        "De stroom uit de batterij wordt nu over twee lampjes verdeeld.",
+        "De totale weerstand wordt kleiner, dus er gaat meer stroom door A."],
+    why: "Elke parallelle tak staat direct op de batterij. Bij een ideale bron verandert de spanning over A niet, dus ook de stroom door A niet. De batterij levert nu twee keer zoveel stroom. (Een echte batterij heeft inwendige weerstand; dan wordt A een heel klein beetje zwakker.)",
+    mis: "Meer lampjes parallel maakt elk lampje zwakker, omdat de batterij 'verdeelt'. Laat leerlingen ook de batterijstroom voorspellen.",
+    elektra: "Waarom brandt een lampje even fel als je er een tweede lampje parallel bij zet?" },
+  { id: "w3-05", w: 3, s: "reken", t: "mc", par: "20.7",
+    q: "Twee gelijke lampjes staan parallel op een batterij. Door elk lampje loopt 0,20 A. Hoeveel stroom levert de batterij?",
+    o: ["0,40 A", "0,20 A", "0,10 A", "0,80 A"],
+    why: "In een knooppunt splitst de stroom: de stromen door de takken tellen op. 0,20 + 0,20 = 0,40 A." },
+  { id: "w3-06", w: 3, s: "begrip", t: "mc", par: "20.8", fig: FIG_KORT,
+    q: "Lampjes A en B branden in serie. Je zet een extra draad parallel aan lampje B (zie de tekening). Wat gebeurt er?",
+    o: ["B gaat uit en A brandt feller.", "B gaat uit en A blijft even fel.", "Beide lampjes branden zwakker.", "B brandt nog een beetje en A brandt feller."],
+    why: "De draad heeft (bijna) geen weerstand: B is kortgesloten. Over B staat dan (bijna) geen spanning, dus B gaat uit. De totale weerstand is nu alleen die van A, dus de stroom wordt groter en A brandt feller (op de volle bronspanning).",
+    mis: "Bij een kortsluiting gaat er toch nog een beetje stroom door het lampje." },
+  { id: "w3-07", w: 3, s: "begrip", t: "mc", par: "20.6",
+    q: "Een batterij, een lampje en een weerstand staan in serie. Je verplaatst de weerstand van vóór het lampje naar achter het lampje. Wat gebeurt er met het lampje?",
+    o: ["Niets; het brandt even fel.", "Het brandt feller.", "Het brandt zwakker."],
+    why: "De stroom wordt bepaald door de totale weerstand van de kring, en die verandert niet. De kring reageert als geheel: 'vóór' of 'achter' maakt niet uit.",
+    mis: "Sequentieel redeneren: een weerstand achter het lampje heeft geen invloed, want de stroom is het lampje al voorbij." },
+  { id: "w3-08", w: 3, s: "reken", t: "mc", par: "20.6",
+    q: "Weerstanden van 10 Ω en 30 Ω staan in serie. Hoe groot is de vervangingsweerstand?",
+    o: ["40 Ω", "7,5 Ω", "20 Ω", "300 Ω"],
+    why: "In serie tel je de weerstanden op: 10 + 30 = 40 Ω. 7,5 Ω zou de vervangingsweerstand bij parallel schakelen zijn." },
+  { id: "w3-09", w: 3, s: "reken", t: "mc", par: "20.7",
+    q: "Twee weerstanden van elk 20 Ω staan parallel. Hoe groot is de vervangingsweerstand?",
+    o: ["10 Ω", "40 Ω", "20 Ω", "0,10 Ω"],
+    why: "1/R = 1/20 + 1/20 = 2/20, dus R = 10 Ω. Twee gelijke weerstanden parallel geven de helft. Wie 1/R vergeet om te keren, komt op 0,10." },
+  { id: "w3-10", w: 3, s: "begrip", t: "mc", par: "20.7",
+    q: "Je zet een extra weerstand parallel aan een bestaande weerstand. Wat gebeurt er met de vervangingsweerstand?",
+    o: ["Die wordt kleiner, zelfs kleiner dan de kleinste van de twee.", "Die wordt groter.", "Die blijft gelijk.", "Dat hangt af van welke weerstand het grootst is."],
+    why: "Een extra parallelle tak is een extra weg voor de stroom. Bij dezelfde spanning loopt er dus meer stroom: de vervangingsweerstand wordt kleiner, altijd kleiner dan de kleinste losse weerstand." },
+  { id: "w3-11", w: 3, s: "reken", t: "mc", par: "20.8", fig: FIG_NETWERK,
+    q: "Hoe groot is de vervangingsweerstand tussen A en B?",
+    o: ["20 Ω", "50 Ω", "30 Ω", "15 Ω"],
+    why: "De twee weerstanden van 20 Ω parallel geven samen 10 Ω. Die staan in serie met 10 Ω: 10 + 10 = 20 Ω. Wie alles optelt, krijgt 50 Ω." },
+  { id: "w3-12", w: 3, s: "reken", t: "mc", par: "20.10", fig: FIG_KNOOP,
+    q: "In het knooppunt komt 3 A binnen en gaat 1 A weg (zie de tekening). Hoe groot is I₃, en welke richting heeft die stroom?",
+    o: ["2 A, van het knooppunt af", "4 A, van het knooppunt af", "2 A, naar het knooppunt toe", "4 A, naar het knooppunt toe"],
+    why: "Knooppuntregel: wat binnenkomt, gaat er ook weer uit (ladingsbehoud). Er komt 3 A binnen en 1 A gaat weg, dus moet er nog 2 A weggaan via I₃." },
+  { id: "w3-13", w: 3, s: "begrip", t: "mc", par: "20.10",
+    q: "Je lost met de regels van Kirchhoff een stroom op en vindt I₂ = −0,4 A. Wat betekent dat?",
+    o: ["Er loopt 0,4 A, maar tegen de richting in die je vooraf koos.", "Je hebt een rekenfout gemaakt.", "Er loopt geen stroom.", "De stroom is te klein om te meten."],
+    why: "Bij Kirchhoff kies je de richting van elke stroom vooraf willekeurig. Een negatieve uitkomst is geen fout: de stroom loopt dan de andere kant op. Reken daarna wel consequent verder met het minteken.",
+    mis: "Je moet de stroomrichtingen vooraf 'goed' kiezen, anders klopt de berekening niet.",
+    elektra: "Wat betekent een negatieve stroom als je de wetten van Kirchhoff toepast?" },
+  { id: "w3-14", w: 3, s: "kennis", t: "koppel", par: "20.10–20.11",
+    q: "Koppel elk begrip aan wat erbij hoort.",
+    pairs: [["knooppuntregel", "volgt uit ladingsbehoud"], ["lusregel", "volgt uit energiebehoud"], ["ampèremeter", "in serie, heel kleine weerstand"], ["voltmeter", "parallel, heel grote weerstand"]],
+    why: "Lading verdwijnt niet in een knooppunt, en een lading die een hele lus rondgaat, krijgt evenveel energie als ze afgeeft. Een meter mag de schakeling zo weinig mogelijk storen: daarom heeft een ampèremeter een heel kleine en een voltmeter een heel grote weerstand." },
+  { id: "w3-15", w: 3, s: "kennis", t: "mc", par: "20.10",
+    q: "Wat zegt de lusregel (maaswet) van Kirchhoff?",
+    o: ["Rond een gesloten lus is de som van alle spanningsveranderingen nul.", "In een gesloten lus is de som van de stromen nul.", "Over elke weerstand in een lus staat dezelfde spanning.", "De stroom is in elke lus van een netwerk even groot."],
+    why: "De bronspanningen in een lus zijn samen even groot als de spanningen over de weerstanden. Dat is energiebehoud: ga je rond en kom je terug op hetzelfde punt, dan heeft de lading weer dezelfde energie." },
+  { id: "w3-16", w: 3, s: "begrip", t: "twee", par: "20.11",
+    q: "Je zet per ongeluk een voltmeter in serie met een lampje op een batterij. Wat gebeurt er?",
+    o: ["Het lampje gaat (vrijwel) uit.", "Het lampje brandt normaal.", "De voltmeter gaat stuk."],
+    r: ["Een voltmeter heeft een heel grote weerstand, dus de stroom wordt vrijwel nul.",
+        "Een voltmeter meet alleen spanning en heeft geen invloed op de stroom.",
+        "Door een voltmeter loopt altijd een grote stroom."],
+    why: "Door de grote weerstand van de voltmeter loopt er bijna geen stroom. Het lampje gaat uit, en de voltmeter wijst ongeveer de bronspanning aan.",
+    mis: "Meters hebben geen invloed op de schakeling. Laat leerlingen de gevolgen van een verkeerd geplaatste meter voorspellen." },
+  { id: "w3-17", w: 3, s: "begrip", t: "mc", par: "20.11",
+    q: "Je zet per ongeluk een ampèremeter parallel over een brandend lampje. Wat gebeurt er?",
+    o: ["Het lampje gaat uit en er loopt een grote stroom door de meter.", "Het lampje brandt normaal en de meter wijst de stroom door het lampje aan.", "Het lampje brandt feller."],
+    why: "Een ampèremeter heeft een heel kleine weerstand. Parallel over het lampje is het een kortsluiting: bijna alle stroom gaat door de meter. Daardoor kan de zekering van de meter doorslaan." },
+  { id: "w3-18", w: 3, s: "kennis", t: "mc", par: "20.14",
+    q: "Waarop reageert een aardlekschakelaar?",
+    o: ["Op een verschil tussen de stroom heen (fase) en de stroom terug (nul).", "Op een te grote stroom.", "Op een te hoge spanning.", "Op kortsluiting tussen fase en nul."],
+    why: "Is de stroom terug kleiner dan de stroom heen, dan lekt er stroom weg, bijvoorbeeld via iemand naar de aarde. Al bij een verschil van 30 mA schakelt de aardlekschakelaar af. Een te grote stroom of kortsluiting is het werk van de zekering (installatieautomaat).",
+    mis: "Een aardlekschakelaar reageert op een te grote stroom, net als een zekering." },
+  { id: "w3-19", w: 3, s: "begrip", t: "mc", par: "20.14",
+    q: "Waarom is de metalen behuizing van een wasmachine via randaarde verbonden met de aarde?",
+    o: ["Komt de fase tegen de behuizing, dan loopt de stroom via de aardedraad weg en schakelt de beveiliging af, in plaats van via jou.",
+        "Om statische lading van de draaiende trommel af te voeren.",
+        "Om energie te besparen.",
+        "Zodat de machine minder spanning krijgt."],
+    why: "Bij een defect kan de behuizing onder spanning komen te staan. Door de aardedraad met zijn kleine weerstand loopt er dan direct een flinke stroom naar de aarde, en de aardlekschakelaar of zekering schakelt af." },
+  { id: "w3-20", w: 3, s: "begrip", t: "mc", par: "20.7",
+    q: "In huis staan alle stopcontacten en lampen parallel. Waarom niet in serie?",
+    o: ["Zo krijgt elk apparaat de volle 230 V en werkt het los van de andere apparaten.", "Parallel levert minder stroom en is dus zuiniger.", "In serie zou de stroom te groot worden.", "Zo hoeft de meterkast maar één zekering te hebben."],
+    why: "Elke parallelle tak staat op de volle netspanning. Zet je een apparaat uit, dan blijven de andere gewoon werken. In serie zouden alle apparaten samen de spanning delen en zou alles uitgaan als er één uit staat." },
+
+  // ---------- Week 5: Stroom en magnetisme ----------
+  { id: "w5-01", w: 5, s: "kennis", t: "mc", par: "21.9",
+    q: "Welke metalen worden door een magneet aangetrokken?",
+    o: ["IJzer, nikkel en kobalt (en legeringen daarvan): de ferromagnetische stoffen", "Alle metalen", "Alleen ijzer", "Alle metalen die stroom geleiden"],
+    why: "Alleen ferromagnetische stoffen worden duidelijk aangetrokken. Koper, aluminium en de meeste munten niet.",
+    mis: "Magneten trekken alle metalen aan. Laat leerlingen aluminium, koper en munten testen." },
+  { id: "w5-02", w: 5, s: "begrip", t: "mc", par: "21.9",
+    q: "Een magneet trekt een ongemagnetiseerde ijzeren spijker aan. Hoe komt dat?",
+    o: ["De magneet maakt de spijker tijdelijk zelf magnetisch; de kant bij de magneet wordt een tegengestelde pool.",
+        "De spijker is van zichzelf al een zwakke magneet.",
+        "Een magneet trekt alle metalen aan.",
+        "De magneet geeft elektrische lading aan de spijker."],
+    why: "Dat heet magnetische influentie. In de spijker richten de magnetische domeinen zich naar het veld van de magneet. De kant bij een noordpool wordt een zuidpool, en tegengestelde polen trekken elkaar aan. Vergelijk het met elektrische influentie (§ 18.4).",
+    elektra: "Hoe lijkt magnetische influentie op elektrische influentie, en waarin verschilt het?" },
+  { id: "w5-03", w: 5, s: "begrip", t: "twee", par: "21.9",
+    q: "Aan een magneet hangt een spijker van zacht ijzer, en aan die spijker hangt een tweede spijker. Je haalt de magneet weg. Blijft de tweede spijker aan de eerste hangen?",
+    o: ["Nee (of nauwelijks)", "Ja"],
+    r: ["In zacht ijzer richten de domeinen zich weer willekeurig zodra het veld van de magneet weg is.",
+        "De magneet heeft de spijkers voorgoed omgezet in permanente magneten.",
+        "De spijkers blijven aan elkaar zitten door elektrische lading."],
+    why: "Zolang de magneet er is, is de eerste spijker zelf een magneet en trekt hij de tweede aan. Zacht ijzer verliest zijn magnetisme bijna helemaal als het externe veld weg is. Bij staal blijft er meer magnetisme achter: zo maak je een permanente magneet." },
+  { id: "w5-04", w: 5, s: "kennis", t: "mc", par: "21.9",
+    q: "Wat is een magnetisch domein?",
+    o: ["Een klein gebied in een ferromagnetische stof waarin de atomen magnetisch dezelfde kant op wijzen.", "Het gebied rond een magneet waarin je een kracht voelt.", "De noord- of zuidpool van een magneet.", "Een stuk ijzer zonder magnetisme."],
+    why: "In ongemagnetiseerd ijzer wijzen de domeinen alle kanten op en heffen ze elkaar op. In een magneet zijn ze grotendeels in dezelfde richting gericht." },
+  { id: "w5-05", w: 5, s: "begrip", t: "mc", par: "21.9",
+    q: "Je zaagt een staafmagneet middendoor. Wat krijg je?",
+    o: ["Twee magneten, elk met een noord- en een zuidpool.", "Een losse noordpool en een losse zuidpool.", "Twee stukken die niet meer magnetisch zijn."],
+    why: "De domeinen blijven gericht, dus elk stuk is weer een complete magneet. Losse magnetische polen (monopolen) zijn nooit gevonden.",
+    mis: "Een doorgezaagde magneet geeft een losse noord- en zuidpool." },
+  { id: "w5-06", w: 5, s: "begrip", t: "mc", par: "21.1",
+    q: "Is de noordpool van een magneet positief geladen?",
+    o: ["Nee; magnetische polen zijn geen elektrische ladingen.", "Ja: noord is +, zuid is −.", "Alleen bij een elektromagneet."],
+    why: "Een magneet is elektrisch neutraal. Een stilstaande lading merkt niets van een magneet, en een magneetpool trekt een geladen voorwerp niet aan zoals een lading dat doet.",
+    mis: "Polen zijn ladingen; noord = +." },
+  { id: "w5-07", w: 5, s: "kennis", t: "mc", par: "21.1",
+    q: "Welke richting hebben de magnetische veldlijnen buiten een staafmagneet?",
+    o: ["Van de noordpool naar de zuidpool", "Van de zuidpool naar de noordpool", "Van het midden naar beide polen"],
+    why: "Buiten de magneet lopen de veldlijnen van noord naar zuid, binnen de magneet van zuid naar noord: magnetische veldlijnen zijn gesloten lussen. Een kompasnaald wijst met zijn noordpool langs de veldlijnen." },
+  { id: "w5-08", w: 5, s: "begrip", t: "mc", par: "21.7", fig: FIG_RONDDRAAD,
+    q: "Door een lange rechte draad loopt een stroom het papier uit (bovenaanzicht). Hoe lopen de magnetische veldlijnen eromheen?",
+    o: ["In cirkels, tegen de klok in", "In cirkels, met de klok mee", "Recht van de draad af", "Recht naar de draad toe"],
+    why: "Rechterhandregel: duim langs de stroom (naar je toe), dan geven je gekromde vingers de richting van de veldlijnen: tegen de klok in. Kompasnaaldjes rond de draad laten die cirkels zien.",
+    mis: "Het veld rond een stroomdraad wijst van de draad af, zoals het elektrische veld rond een lading." },
+  { id: "w5-09", w: 5, s: "begrip", t: "twee", par: "21.5", fig: FIG_DRAADVELD,
+    q: "Door een rechte draad loopt een stroom naar rechts in een homogeen magnetisch veld het papier in. Welke richting heeft de kracht op de draad?",
+    o: ["Omhoog (in het vlak van het papier)", "Het papier in", "Naar rechts", "Omlaag"],
+    r: ["De kracht staat loodrecht op de stroom én loodrecht op het veld.",
+        "De kracht werkt langs de veldlijnen.",
+        "De kracht werkt in de richting van de stroom."],
+    why: "De lorentzkracht staat loodrecht op I en op B. Met de rechterhandregel (vingers langs B, duim langs I, de handpalm duwt) vind je: omhoog.",
+    mis: "De magnetische kracht werkt langs de veldlijnen. Laat de richting voorspellen vóór je de demo met de draad in de hoefijzermagneet doet.",
+    elektra: "Hoe bepaal ik met de rechterhand de richting van de lorentzkracht op een stroomdraad?" },
+  { id: "w5-10", w: 5, s: "begrip", t: "mc", par: "21.5",
+    q: "Een stroomvoerende draad ligt evenwijdig aan de veldlijnen van een homogeen magnetisch veld. Hoe groot is de lorentzkracht op de draad?",
+    o: ["Nul", "Maximaal", "Half zo groot als wanneer de draad loodrecht op het veld staat"],
+    why: "F = B·I·L·sin θ, met θ de hoek tussen stroom en veld. Evenwijdig betekent θ = 0, dus sin θ = 0 en F = 0." },
+  { id: "w5-11", w: 5, s: "reken", t: "mc", par: "21.5",
+    q: "Een draad van 0,30 m staat loodrecht op een magnetisch veld van 0,50 T. Er loopt 2,0 A door. Hoe groot is de kracht?",
+    o: ["0,30 N", "3,0 N", "1,2 N", "0,030 N"],
+    why: "F = B·I·L = 0,50 · 2,0 · 0,30 = 0,30 N." },
+  { id: "w5-12", w: 5, s: "begrip", t: "mc", par: "21.7", fig: FIG_TWEEDRADEN,
+    q: "Door twee evenwijdige draden loopt een stroom in dezelfde richting. Wat doen de draden?",
+    o: ["Ze trekken elkaar aan.", "Ze stoten elkaar af.", "Ze oefenen geen kracht op elkaar uit."],
+    why: "Elke draad staat in het magnetische veld van de andere. Met de rechterhandregels vind je: stromen in dezelfde richting trekken elkaar aan, tegengestelde stromen stoten elkaar af. Precies andersom dan bij ladingen!",
+    mis: "Gelijk stoot af, net als bij ladingen en magneetpolen." },
+  { id: "w5-13", w: 5, s: "reken", t: "mc", par: "21.7",
+    q: "Op afstand r van een lange rechte stroomdraad is het magnetische veld B. Hoe groot is het veld op afstand 2r?",
+    o: ["B/2", "B/4", "2B", "B"],
+    why: "B = μ₀·I/(2π·r): het veld is omgekeerd evenredig met r, niet met r². Twee keer zo ver weg geeft de helft.",
+    mis: "Het kwadraat uit de wet van Coulomb overnemen: dan zou het B/4 zijn." },
+  { id: "w5-14", w: 5, s: "reken", t: "mc", par: "21.7",
+    q: "Een lange spoel heeft N windingen. Je maakt een spoel van dezelfde lengte met 2N windingen en stuurt er dezelfde stroom door. Hoe groot is het veld in de spoel?",
+    o: ["2 keer zo groot", "4 keer zo groot", "Even groot", "Half zo groot"],
+    why: "B = μ₀·(N/L)·I: het veld is evenredig met het aantal windingen per meter. Twee keer zoveel windingen op dezelfde lengte geeft een twee keer zo sterk veld." },
+  { id: "w5-15", w: 5, s: "kennis", t: "mc", par: "21.7",
+    q: "Hoe heet de constante μ₀ = 4π · 10⁻⁷ T·m/A?",
+    o: ["De magnetische veldconstante (permeabiliteit van het vacuüm)", "De elektrische veldconstante", "De constante van Coulomb", "De magnetische flux"],
+    why: "μ₀ is de magnetische veldconstante, in het Engels permeability of free space. De elektrische tegenhanger is ε₀ (week 1)." },
+  { id: "w5-16", w: 5, s: "kennis", t: "koppel", par: "21.5–21.7",
+    q: "Koppel elke grootheid aan haar eenheid.",
+    pairs: [["magnetische veldsterkte B", "tesla (T)"], ["magnetische veldconstante μ₀", "T·m/A"], ["krachtmoment τ", "newtonmeter (N·m)"], ["lorentzkracht F", "newton (N)"]],
+    why: "1 T is het veld waarin een draad van 1 m met 1 A loodrecht op het veld een kracht van 1 N ondervindt: T = N/(A·m)." },
+  { id: "w5-17", w: 5, s: "kennis", t: "mc", par: "21.7",
+    q: "Hoe vind je met de rechterhand de richting van het magnetische veld rond een rechte stroomdraad?",
+    o: ["Duim langs de stroom; de gekromde vingers geven de richting van de veldlijnen.", "Vingers langs de stroom; de duim geeft de richting van het veld.", "Duim langs het veld; de vingers geven de stroom.", "Wijsvinger langs de stroom, middelvinger langs het veld."],
+    why: "Bij een rechte draad wijst de duim langs de stroom. Let op: bij een spoel is het andersom. Daar volgen de vingers de stroom door de windingen en wijst de duim naar de noordpool.",
+    mis: "De rechterhandregels als trucje, met de verkeerde vinger of volgorde. Laat steeds benoemen wat elke vinger voorstelt." },
+  { id: "w5-18", w: 5, s: "begrip", t: "mc", par: "21.6",
+    q: "Wanneer is het krachtmoment op een stroomvoerende spoel in een homogeen magnetisch veld het grootst?",
+    o: ["Als het vlak van de spoel evenwijdig aan de veldlijnen ligt", "Als het vlak van de spoel loodrecht op de veldlijnen staat", "Het krachtmoment is in elke stand even groot"],
+    why: "τ = N·I·A·B·sin φ, met φ de hoek tussen de normaal op de spoel en het veld. Ligt het vlak evenwijdig aan B, dan is φ = 90°: maximaal krachtmoment. Staat het vlak loodrecht op B, dan is het krachtmoment nul." },
+  { id: "w5-19", w: 5, s: "begrip", t: "mc", par: "21.6",
+    q: "Waarvoor dient de commutator (stroomwisselaar) in een gelijkstroommotor?",
+    o: ["Hij keert na elke halve draai de stroom in de spoel om, zodat het krachtmoment steeds dezelfde draairichting geeft.", "Hij verhoogt de spanning op de spoel.", "Hij remt de spoel af als die te snel draait.", "Hij zet gelijkstroom om in wisselstroom voor het net."],
+    why: "Zonder commutator zou het krachtmoment na een halve draai omkeren en zou de spoel heen en weer schommelen. Door de stroom op het juiste moment om te keren, blijft de motor dezelfde kant op draaien." },
+  { id: "w5-20", w: 5, s: "begrip", t: "mc", par: "21.5",
+    q: "Een geladen deeltje beweegt loodrecht op een homogeen magnetisch veld. Waarom wordt het deeltje niet sneller?",
+    o: ["De lorentzkracht staat steeds loodrecht op de snelheid; alleen de richting verandert.", "Het magnetische veld remt het deeltje juist af.", "Er werkt geen kracht op het deeltje.", "Het deeltje wordt wel sneller, maar heel langzaam."],
+    why: "Een kracht loodrecht op de beweging verricht geen arbeid, net als bij een steen aan een touw. Het deeltje beschrijft een cirkelbaan met constante snelheid.",
+    mis: "De lorentzkracht verricht arbeid en versnelt het deeltje." },
+
+  // ---------- Week 6: Elektromagnetische inductie ----------
+  { id: "w6-01", w: 6, s: "begrip", t: "twee", par: "22.1", fig: FIG_SPOEL,
+    q: "Een sterke magneet ligt stil in een spoel die op een stroommeter is aangesloten. Loopt er een inductiestroom?",
+    o: ["Nee", "Ja"],
+    r: ["Alleen een veranderende magnetische flux door de spoel wekt een spanning op.",
+        "Het veld van de magneet is sterk genoeg om een stroom op te wekken.",
+        "De magneet geeft elektronen af aan de spoel."],
+    why: "Inductie draait om verandering. Een stilliggende magneet geeft een constante flux, en dan is er geen inductiespanning, hoe sterk de magneet ook is. Beweeg je de magneet, dan wijst de meter wél uit.",
+    mis: "Inductie ontstaat bij een sterk veld, niet bij een veranderend veld. Doe de proef als voorspellen–waarnemen–verklaren: magneet stil in de spoel tegenover bewegend.",
+    elektra: "Waarom wekt een stilliggende magneet in een spoel geen stroom op?" },
+  { id: "w6-02", w: 6, s: "begrip", t: "mc", par: "22.1",
+    q: "Je beweegt een magneet bij een draadwinding met een spleet erin (de kring is open). Wat gebeurt er?",
+    o: ["Er ontstaat een inductiespanning, maar er loopt geen stroom.", "Er gebeurt niets, want de kring is niet gesloten.", "Er ontstaat een spanning en er loopt ook een stroom."],
+    why: "De fluxverandering induceert altijd een spanning, ook in een open winding: die meet je over de spleet. Voor een stroom is wel een gesloten kring nodig. Dat zie je bij de ring van Thomson met en zonder spleet.",
+    mis: "Inductie vraagt een gesloten kring." },
+  { id: "w6-03", w: 6, s: "kennis", t: "mc", par: "22.3",
+    q: "Voor de magnetische flux geldt Φ = B·A·cos φ. Wat is φ?",
+    o: ["De hoek tussen het veld en de normaal op het oppervlak", "De hoek tussen het veld en het oppervlak zelf", "De draaihoek van de magneet", "De fase van de wisselspanning"],
+    why: "De normaal staat loodrecht op het oppervlak. Gaat het veld recht door het oppervlak, dan is φ = 0 en is de flux maximaal (B·A)." },
+  { id: "w6-04", w: 6, s: "reken", t: "mc", par: "22.3",
+    q: "Een winding met een oppervlakte van 0,020 m² staat loodrecht op een magnetisch veld van 0,50 T (het veld gaat recht door de winding). Hoe groot is de flux?",
+    o: ["0,010 Wb", "0,10 Wb", "0,040 Wb", "25 Wb"],
+    why: "Φ = B·A = 0,50 · 0,020 = 0,010 Wb. Wie deelt in plaats van vermenigvuldigt, krijgt 25 of 0,040." },
+  { id: "w6-05", w: 6, s: "begrip", t: "mc", par: "22.3",
+    q: "Je draait dezelfde winding zo dat het vlak van de winding evenwijdig aan de veldlijnen ligt. Hoe groot is de flux nu?",
+    o: ["Nul", "Nog steeds 0,010 Wb", "Het dubbele"],
+    why: "Er gaan nu geen veldlijnen door de winding: φ = 90°, cos φ = 0, dus Φ = 0. Het veld is even sterk gebleven; alleen de flux door de winding is veranderd.",
+    mis: "Flux en veld zijn hetzelfde. Ook het oppervlak en de stand tellen mee." },
+  { id: "w6-06", w: 6, s: "kennis", t: "koppel", par: "22.3–22.4",
+    q: "Koppel elke grootheid aan haar eenheid.",
+    pairs: [["magnetische flux Φ", "weber (Wb) = T·m²"], ["magnetische veldsterkte B", "tesla (T)"], ["fluxverandering per seconde ΔΦ/Δt", "Wb/s = V"], ["inductiespanning", "volt (V)"]],
+    why: "Volgens de wet van Faraday is de inductiespanning gelijk aan (het aantal windingen keer) de fluxverandering per seconde. Daarom is 1 Wb/s gelijk aan 1 V." },
+  { id: "w6-07", w: 6, s: "begrip", t: "mc", par: "22.4", fig: FIG_FLUX,
+    q: "De grafiek toont de flux door een spoel als functie van de tijd. In welk interval is de inductiespanning het grootst?",
+    o: ["III", "II", "I"],
+    why: "De inductiespanning hangt af van hoe snel de flux verandert: de steilheid van de grafiek. In III daalt de flux het snelst. In II is de flux groot, maar constant: daar is de inductiespanning nul.",
+    mis: "Een grote flux geeft een grote inductiespanning. Laat leerlingen een Φ(t)-grafiek omzetten in een U(t)-grafiek.",
+    elektra: "Waarom hangt de inductiespanning af van de verandering van de flux, en niet van de flux zelf?" },
+  { id: "w6-08", w: 6, s: "begrip", t: "mc", par: "22.4", fig: FIG_FLUX,
+    q: "Hoe groot is de inductiespanning in interval II, waar de flux groot is?",
+    o: ["Nul", "Groot, want de flux is groot", "Even groot als in interval I"],
+    why: "In II verandert de flux niet, dus ΔΦ/Δt = 0 en er is geen inductiespanning, hoe groot de flux ook is." },
+  { id: "w6-09", w: 6, s: "reken", t: "mc", par: "22.4",
+    q: "Een spoel heeft 100 windingen. De flux per winding neemt in 0,50 s gelijkmatig af van 0,020 Wb tot nul. Hoe groot is de inductiespanning?",
+    o: ["4,0 V", "0,040 V", "1,0 V", "2,0 V"],
+    why: "U = N·ΔΦ/Δt = 100 · 0,020/0,50 = 4,0 V. Wie N vergeet, krijgt 0,040 V; wie met Δt vermenigvuldigt, krijgt 1,0 V." },
+  { id: "w6-10", w: 6, s: "reken", t: "mc", par: "22.4",
+    q: "Je laat dezelfde fluxverandering in de helft van de tijd plaatsvinden. Wat gebeurt er met de inductiespanning?",
+    o: ["Die wordt 2 keer zo groot.", "Die wordt half zo groot.", "Die blijft gelijk.", "Die wordt 4 keer zo groot."],
+    why: "U = N·ΔΦ/Δt: dezelfde ΔΦ in de helft van de tijd geeft een twee keer zo grote spanning (wel maar half zo lang)." },
+  { id: "w6-11", w: 6, s: "begrip", t: "twee", par: "22.5",
+    q: "Je trekt de noordpool van een magneet uit een spoel. Wordt de kant van de spoel bij de magneet dan een noordpool of een zuidpool?",
+    o: ["Een zuidpool", "Een noordpool"],
+    r: ["De spoel werkt de verandering tegen: ze probeert de weggaande magneet vast te houden en trekt de noordpool dus aan.",
+        "Het geïnduceerde veld is altijd tegengesteld aan het veld van de magneet.",
+        "Een spoel stoot een magneet altijd af."],
+    why: "Wet van Lenz: de inductiestroom werkt de oorzaak tegen. Hier neemt de flux af, dus het geïnduceerde veld wijst juist mee met het veld van de magneet. De spoel trekt de magneet terug: de kant bij de noordpool wordt een zuidpool.",
+    mis: "Het geïnduceerde veld is altijd tegengesteld aan het externe veld. Het is tegengesteld aan de verandering: bij afnemende flux is het juist mee gericht.",
+    elektra: "Leg uit waarom het geïnduceerde veld bij afnemende flux met het externe veld mee wijst." },
+  { id: "w6-12", w: 6, s: "begrip", t: "mc", par: "22.5",
+    q: "Je duwt de noordpool van een magneet een spoel in. De spoel is aangesloten op een lampje. Welke kracht oefent de spoel op de magneet uit?",
+    o: ["Een afstotende kracht", "Een aantrekkende kracht", "Geen kracht"],
+    why: "De flux neemt toe, dus de inductiestroom maakt een veld dat die toename tegenwerkt: de kant bij de magneet wordt een noordpool en stoot de magneet af. Je moet dus arbeid verrichten; die energie komt in het lampje terecht." },
+  { id: "w6-13", w: 6, s: "begrip", t: "mc", par: "22.5",
+    q: "Waarom is een fietsdynamo zwaarder rond te draaien als het lampje brandt dan als het lampje los zit?",
+    o: ["De inductiestroom werkt volgens Lenz de beweging tegen; jij levert de energie voor het licht.", "Het lampje maakt de dynamo warm en daardoor stroever.", "De magneet wordt zwakker als het lampje brandt."],
+    why: "De wet van Lenz is energiebehoud. Loopt er stroom, dan werkt een tegenkracht op de draaiende magneet of spoel. De arbeid die je daartegen verricht, wordt de elektrische energie van het lampje. Zonder stroom (los lampje) is er geen tegenkracht.",
+    mis: "Inductie levert energie 'uit het niets'." },
+  { id: "w6-14", w: 6, s: "begrip", t: "mc", par: "22.5",
+    q: "Een sterke magneet valt veel langzamer door een koperen buis dan door een plastic buis. Hoe komt dat?",
+    o: ["In het koper ontstaan wervelstromen die volgens Lenz de val tegenwerken.", "Koper is magnetisch en trekt de magneet aan.", "In de koperen buis is meer luchtweerstand.", "De magneet wordt in het koper elektrisch geladen."],
+    why: "Koper is niet ferromagnetisch. Maar de vallende magneet verandert de flux door elk ringetje van de buis, zodat er wervelstromen ontstaan. Hun veld werkt de beweging tegen. In plastic kan geen stroom lopen.",
+    mis: "Het koper wordt magnetisch." },
+  { id: "w6-15", w: 6, s: "begrip", t: "mc", par: "22.2", fig: FIG_RAILS,
+    q: "Een metalen staaf glijdt naar rechts over twee rails in een magnetisch veld het papier in. Links zit een lampje. In welke richting loopt de inductiestroom door de staaf?",
+    o: ["Omhoog (in de tekening)", "Omlaag (in de tekening)", "Er loopt geen stroom."],
+    why: "De vrije ladingen in de staaf bewegen mee naar rechts en ondervinden een lorentzkracht. Voor positieve lading (stroomrichting) geeft de rechterhandregel: omhoog. Controle met Lenz: het oppervlak van de kring wordt groter, dus de flux het papier in neemt toe. De inductiestroom moet een veld het papier uit maken: tegen de klok in, dus in de staaf omhoog." },
+  { id: "w6-16", w: 6, s: "reken", t: "mc", par: "22.2",
+    q: "Een staaf van 0,20 m beweegt met 3,0 m/s loodrecht door een magnetisch veld van 0,50 T. Hoe groot is de inductiespanning over de staaf?",
+    o: ["0,30 V", "3,0 V", "0,030 V", "7,5 V"],
+    why: "U = B·L·v = 0,50 · 0,20 · 3,0 = 0,30 V." },
+  { id: "w6-17", w: 6, s: "kennis", t: "koppel", par: "22.1–22.5",
+    q: "Koppel elk Nederlands begrip aan de term in het boek.",
+    pairs: [["inductiespanning", "induced emf"], ["bewegingsinductie", "motional emf"], ["wervelstroom", "eddy current"], ["wet van Lenz", "Lenz's law"]],
+    why: "Let op: het boek gebruikt 'induction' in H18 ook voor wat wij influentie noemen. In H22 betekent het inductie." },
+
+  // ---------- Week 7: Toepassingen en transformatoren ----------
+  { id: "w7-01", w: 7, s: "reken", t: "mc", par: "22.9", fig: FIG_TRAFO,
+    q: "De primaire spoel heeft 460 windingen en staat op 230 V. De secundaire spoel heeft 24 windingen. Hoe groot is de secundaire spanning?",
+    o: ["12 V", "4400 V", "230 V", "24 V"],
+    why: "Uₛ/Uₚ = Nₛ/Nₚ, dus Uₛ = 230 · 24/460 = 12 V. Wie de verhouding omdraait, komt op 4400 V." },
+  { id: "w7-02", w: 7, s: "kennis", t: "mc", par: "22.9",
+    q: "Welke formule geldt voor een ideale transformator?",
+    o: ["Uₛ/Uₚ = Nₛ/Nₚ", "Uₛ/Uₚ = Nₚ/Nₛ", "Uₛ · Uₚ = Nₛ · Nₚ", "Iₛ/Iₚ = Nₛ/Nₚ"],
+    why: "De spanning per winding is in beide spoelen gelijk, omdat dezelfde fluxverandering door alle windingen gaat. Voor de stromen geldt juist het omgekeerde: Iₛ/Iₚ = Nₚ/Nₛ." },
+  { id: "w7-03", w: 7, s: "begrip", t: "twee", par: "22.9", fig: FIG_TRAFO_DC,
+    q: "Je zet een gelijkspanning op de primaire spoel van een transformator. Wat wijst de voltmeter op de secundaire spoel aan, als de schakelaar al een tijdje gesloten is?",
+    o: ["0 V", "Een constante spanning volgens de windingsverhouding", "Dezelfde spanning als op de primaire spoel"],
+    r: ["Alleen een veranderende stroom geeft een veranderende flux in de kern.",
+        "De kern geeft de spanning door zolang er stroom loopt.",
+        "Elektronen stromen via de kern naar de secundaire spoel."],
+    why: "Een constante stroom geeft een constante flux, en dan is er geen inductie. Alleen bij het in- en uitschakelen verandert de flux even: dan zie je een korte piek. Daarom werkt een transformator alleen op wisselspanning.",
+    mis: "Een transformator werkt ook op gelijkspanning.",
+    elektra: "Waarom werkt een transformator niet op gelijkspanning?" },
+  { id: "w7-04", w: 7, s: "begrip", t: "mc", par: "22.9",
+    q: "Gaan er elektronen van de primaire naar de secundaire spoel van een transformator?",
+    o: ["Nee; de spoelen zijn niet geleidend verbonden. De koppeling gaat via de magnetische flux in de kern.", "Ja, via de ijzeren kern.", "Ja, door de lucht tussen de spoelen."],
+    why: "De twee spoelen zijn elektrisch van elkaar gescheiden (galvanische scheiding). Dat is ook een veiligheidsvoordeel: een apparaat achter een scheidingstransformator heeft geen directe verbinding met het net.",
+    mis: "Elektronen of 'stroom' gaan van de primaire naar de secundaire spoel." },
+  { id: "w7-05", w: 7, s: "begrip", t: "mc", par: "22.9",
+    q: "Waarom heeft een transformator een (gesloten) ijzeren kern?",
+    o: ["De kern bundelt de magnetische veldlijnen, zodat bijna alle flux van de primaire spoel ook door de secundaire spoel gaat.", "Door de kern stroomt het magnetische veld als een vloeistof naar de andere spoel.", "De kern geleidt de stroom van de ene naar de andere spoel.", "De kern maakt de transformator stevig."],
+    why: "IJzer is ferromagnetisch en maakt het veld veel sterker en geconcentreerd in de kern. Er 'stroomt' niets: de veldlijnen lopen door de kern. Met een open kern gaat een deel van de flux langs de secundaire spoel.",
+    mis: "Het magnetische veld stroomt als een vloeistof door de kern." },
+  { id: "w7-06", w: 7, s: "begrip", t: "twee", par: "22.9",
+    q: "Een ideale transformator zet 230 V om in 23 V. Hoe verhoudt de secundaire stroom zich tot de primaire stroom?",
+    o: ["10 keer zo groot", "10 keer zo klein", "Even groot"],
+    r: ["Het vermogen blijft gelijk (Pₚ = Pₛ), dus bij een 10 keer zo kleine spanning hoort een 10 keer zo grote stroom.",
+        "De stroom verandert in dezelfde verhouding als de spanning.",
+        "Een transformator verandert alleen de spanning, niet de stroom."],
+    why: "Een ideale transformator levert evenveel vermogen als hij opneemt: Uₚ·Iₚ = Uₛ·Iₛ. Spanning omlaag betekent stroom omhoog.",
+    mis: "Een hogere secundaire spanning levert gratis meer energie op." },
+  { id: "w7-07", w: 7, s: "reken", t: "mc", par: "22.9",
+    q: "Een ideale transformator neemt primair 0,10 A op bij 230 V. De secundaire spanning is 12 V. Hoe groot is de secundaire stroom?",
+    o: ["1,9 A", "0,0052 A", "0,10 A", "2,8 A"],
+    why: "P = 230 · 0,10 = 23 W. Secundair: I = P/U = 23/12 ≈ 1,9 A." },
+  { id: "w7-08", w: 7, s: "begrip", t: "mc", par: "22.9",
+    q: "Je sluit op de secundaire spoel een apparaat aan dat meer vermogen gebruikt. Wat gebeurt er met de primaire stroom?",
+    o: ["Die wordt groter.", "Die blijft gelijk; de primaire stroom ligt vast.", "Die wordt kleiner."],
+    why: "De transformator neemt primair evenveel vermogen op als het apparaat secundair gebruikt. Meer vermogen secundair betekent dus meer stroom primair. Een onbelaste transformator neemt (bijna) geen stroom op.",
+    mis: "De primaire stroom staat vast, los van wat er secundair is aangesloten." },
+  { id: "w7-09", w: 7, s: "begrip", t: "mc", par: "22.9",
+    q: "Waarom wordt elektrische energie over grote afstanden met hoogspanning getransporteerd?",
+    o: ["Bij een hoge spanning is de stroom klein, zodat het warmteverlies I²R in de kabels klein is.", "Hoogspanning gaat sneller door de kabel.", "Bij hoogspanning hebben de kabels geen weerstand.", "Zo zijn er minder elektronen nodig."],
+    why: "Voor hetzelfde vermogen geeft een 10 keer zo hoge spanning een 10 keer zo kleine stroom en dus 100 keer minder verlies in de kabels. Transformatoren maken het omzetten mogelijk." },
+  { id: "w7-10", w: 7, s: "reken", t: "mc", par: "22.9",
+    q: "Een transformator moet 230 V omzetten in 11,5 V. De primaire spoel heeft 1000 windingen. Hoeveel windingen heeft de secundaire spoel?",
+    o: ["50", "20 000", "20", "500"],
+    why: "Nₛ = Nₚ · Uₛ/Uₚ = 1000 · 11,5/230 = 50. De verhouding is 1 : 20." },
+  { id: "w7-11", w: 7, s: "begrip", t: "mc", par: "22.7", fig: FIG_GENERATOR,
+    q: "De grafiek toont de spanning van een generator. Hoe staat het vlak van de draaiende spoel ten opzichte van de veldlijnen op moment P (een top)?",
+    o: ["Evenwijdig aan de veldlijnen: de flux is dan nul, maar verandert het snelst.", "Loodrecht op de veldlijnen: de flux is dan maximaal.", "Onder een hoek van 45°."],
+    why: "De inductiespanning hangt af van hoe snel de flux verandert. Die verandering is het grootst als de spoel 'door nul' gaat: het vlak evenwijdig aan B. Bij Q (spanning nul) staat het vlak loodrecht op B: de flux is dan maximaal en verandert even niet.",
+    mis: "Een grote flux geeft een grote spanning." },
+  { id: "w7-12", w: 7, s: "reken", t: "mc", par: "22.7", fig: FIG_GENERATOR,
+    q: "Eén periode van de generatorspanning duurt 20 ms (zie de grafiek). Wat is de frequentie?",
+    o: ["50 Hz", "20 Hz", "0,02 Hz", "100 Hz"],
+    why: "f = 1/T = 1/0,020 s = 50 Hz: de frequentie van ons lichtnet." },
+  { id: "w7-13", w: 7, s: "begrip", t: "mc", par: "22.7",
+    q: "Je laat een generator twee keer zo snel draaien. Wat gebeurt er met de piekspanning?",
+    o: ["Die wordt 2 keer zo groot (en de frequentie ook).", "Die blijft gelijk; alleen de frequentie verdubbelt.", "Die wordt 4 keer zo groot."],
+    why: "Umax = N·B·A·ω: de flux verandert twee keer zo snel, dus de piekspanning verdubbelt. Tegelijk verdubbelt de frequentie." },
+  { id: "w7-14", w: 7, s: "begrip", t: "mc", par: "22.7",
+    q: "Wat is het verschil tussen een elektromotor en een generator (dynamo)?",
+    o: ["Ze zijn vergelijkbaar gebouwd; alleen de energieomzetting is omgekeerd.", "Een generator heeft geen magneet.", "Een elektromotor werkt alleen op wisselstroom.", "Een generator heeft geen spoel."],
+    why: "Beide hebben een spoel die in een magnetisch veld draait. Een motor zet elektrische energie om in bewegingsenergie (lorentzkracht), een generator doet het omgekeerde (inductie). Twee gekoppelde motortjes laten dat mooi zien.",
+    mis: "Motor en dynamo zijn totaal verschillende apparaten." },
+  { id: "w7-15", w: 7, s: "begrip", t: "mc", par: "22.6",
+    q: "Hoe maakt een luidspreker geluid?",
+    o: ["Een wisselstroom door de spoel in het veld van een magneet geeft een wisselende kracht; de spoel en de conus gaan trillen.", "Het geluid zit in de stroom en komt uit de draad.", "De magneet trilt doordat er spanning op staat.", "De stroom verwarmt de lucht in de conus, die daardoor uitzet."],
+    why: "Op de spoel werkt een lorentzkracht die met de stroom mee wisselt. De conus trilt mee en duwt de lucht heen en weer: geluid. Het geluid zit niet in de stroom; de stroom heeft dezelfde vorm als de geluidsgolf.",
+    mis: "Het geluid zit in de stroom." },
+  { id: "w7-16", w: 7, s: "begrip", t: "mc", par: "22.6",
+    q: "Een dynamische microfoon is gebouwd als een kleine luidspreker. Hoe werkt hij?",
+    o: ["Geluid laat een spoel in een magnetisch veld trillen; daardoor wordt een wisselspanning geïnduceerd.", "Geluid laadt de spoel elektrisch op.", "Geluid verandert de weerstand van de magneet.", "De microfoon heeft een batterij die het geluid omzet."],
+    why: "Het is de luidspreker omgekeerd: beweging wordt elektrische energie (inductie), net als bij de generator." },
+  { id: "w7-17", w: 7, s: "kennis", t: "koppel", par: "22.6–22.9",
+    q: "Koppel elk apparaat aan wat het doet.",
+    pairs: [["transformator", "zet een wisselspanning om in een hogere of lagere"], ["generator", "zet bewegingsenergie om in elektrische energie"], ["elektromotor", "zet elektrische energie om in bewegingsenergie"], ["luidspreker", "zet een elektrisch signaal om in geluid"]],
+    why: "Motor en luidspreker werken met de lorentzkracht, generator en microfoon met inductie. De transformator gebruikt inductie om spanning om te zetten." }
+];
+
+/* ================================================================== */
+/* OPSLAG (alleen op dit apparaat)                                      */
+/* ================================================================== */
+const LS = "oya-elektriciteit-v1";
+const INTERVAL = [0, 1, 2, 4, 8, 16];
+const AANTAL = [3, 5, 10], MINUTEN = [3, 5];
+const DOELEN = [{ n: 3, t: "3× per week" }, { n: 5, t: "5× per week" }, { n: 7, t: "Elke dag" }];
+function weekdoel() { const d = S.inst.doel; return DOELEN.some(x => x.n === d) ? d : 3; }
+function vandaag(d) { d = d || new Date(); return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0"); }
+function plusDagen(dag, n) { const [y,m,d] = dag.split("-").map(Number); return vandaag(new Date(y, m-1, d+n)); }
+function leeg() { return { v: 1, inst: { modus: "aantal", aantal: 5, min: 3 }, q: {}, dagen: {}, sessies: [] }; }
+let S = leeg();
+try { const x = JSON.parse(localStorage.getItem(LS)); if (x && x.v === 1) S = Object.assign(leeg(), x); } catch (e) {}
+let opslagOk = true;
+function bewaar() { try { localStorage.setItem(LS, JSON.stringify(S)); opslagOk = true; } catch (e) { opslagOk = false; } }
+
+/* ================================================================== */
+/* AFGELEIDE GETALLEN                                                   */
+/* ================================================================== */
+function weekStats(n) {
+  const qs = Q.filter(q => q.w === n); let gezien = 0, box = 0, aangeraakt = 0;
+  qs.forEach(q => { const r = S.q[q.id]; if (r) { gezien += r.gezien; box += r.box; aangeraakt++; } });
+  return { totaal: qs.length, gezien, aangeraakt, beheersing: qs.length ? box / (qs.length * (INTERVAL.length - 1)) : 0 };
+}
+function niveau(st) {
+  if (!st.aangeraakt) return "nog niet begonnen";
+  if (st.beheersing < 0.35) return "bezig";
+  if (st.beheersing < 0.7) return "goed op weg";
+  return "beheerst";
+}
+function dagenDezeWeek() {
+  const nu = new Date(); const wd = (nu.getDay() + 6) % 7; // maandag = 0
+  let n = 0; for (let i = 0; i <= wd; i++) { if (S.dagen[plusDagen(vandaag(), -i)]) n++; } return n;
+}
+
+/* ================================================================== */
+/* SESSIES                                                              */
+/* ================================================================== */
+function schud(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i+1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function wachtrij(week) {
+  const t = vandaag();
+  const pool = week ? Q.filter(q => q.w === week) : Q;
+  return pool.map(q => { const r = S.q[q.id]; const laag = !r ? 2 : (r.due <= t ? 3 : 1); return { q, k: laag * 10 + Math.random() * 3 }; })
+    .sort((a, b) => b.k - a.k).map(x => x.q);
+}
+function scoor(q, goed) {
+  const t = vandaag();
+  const r = S.q[q.id] || { box: 0, gezien: 0, goed: 0, fout: 0, due: t };
+  r.gezien++; if (goed) { r.goed++; r.box = Math.min(r.box + 1, INTERVAL.length - 1); } else { r.fout++; r.box = 0; }
+  r.due = plusDagen(t, INTERVAL[r.box]); S.q[q.id] = r; bewaar();
+}
+
+const app = document.getElementById("app");
+let view = "thuis", sessie = null, tik = null, infoOpen = false, klas = null;
+function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c])); }
+function lengte(extra) { const i = S.inst; return i.modus === "aantal" ? (i.aantal + (extra||0)) + " vragen" : (i.min + (extra||0)) + " minuten"; }
+const SOORT = { begrip: "Begripsvraag", kennis: "Kennisvraag", reken: "Hoofdrekenen" };
+const LT = "ABCDEFGH";
+
+function thuis() {
+  document.body.classList.remove("klas");
+  const dw = dagenDezeWeek(), wd = weekdoel();
+  let h = `<div class="top"><div><h1>Ọya</h1><div class="sub"><span class="muted">Begripstrainer Elektriciteit</span>
+      <button class="info" id="info" aria-expanded="${infoOpen}" aria-label="Over de naam Ọya">i</button></div></div>
+    <div class="doel" aria-label="Weekdoel: ${dw} van ${wd} dagen geoefend"><div class="small muted">Weekdoel</div>
+      <div class="pips${wd > 5 ? " veel" : ""}">${Array.from({length: wd}, (_, i) => `<span class="pip ${i < dw ? "vol" : ""}"></span>`).join("")}</div>
+      <div class="small"><b>${Math.min(dw, wd)}/${wd}</b> dagen${dw >= wd ? " ✓" : ""}</div></div></div>
+  ${infoOpen ? `<div class="infotekst">Ọya is in de Yoruba-traditie (Nigeria) de orisha van wind, bliksem en storm, en beschermster van de rivier de Niger. Ze wordt ook vereerd in onder meer Candomblé (als Iansã) en Santería. Bliksem is een enorme elektrische ontlading: vandaar de naam van deze begripstrainer.</div>` : ""}
+  <div class="rij"><button class="btn btn-primair" id="mix">Oefenen, alle weken · ${lengte()}</button></div>
+  <div class="rij"><button class="btn btn-stil" id="inst">⚙ Instellingen</button><button class="btn btn-stil" id="klasknop">Klasmodus (beamer)</button></div>
+  <div class="small muted">Of kies een week:</div>
+  <ol class="lijnweken" aria-label="Lesweken">`;
+  WEKEN.forEach(w => {
+    const st = weekStats(w.n); const leegw = st.totaal === 0; const pct = Math.round(st.beheersing * 100);
+    h += `<li><button class="halte" data-w="${w.n}" ${leegw ? "disabled" : ""} aria-label="Week ${w.n}: ${esc(w.naam)}${leegw ? ", volgt nog" : ", " + niveau(st)}">
+      <span class="ring" style="background:conic-gradient(var(--zee) ${pct}%, var(--lijn) 0)"><span>${w.n}</span></span>
+      <span><span class="hnaam">${esc(w.naam)}</span><br><span class="hsub">${esc(w.sub)}${leegw ? " · volgt nog" : " · " + niveau(st)}</span></span>
+      <span class="hrechts">${leegw ? "" : `<b>${st.gezien}</b>beantwoord`}</span></button></li>`;
+  });
+  h += `</ol><div class="legenda"><span>De ring vult zich naarmate je de vragen van een week beter beheerst.</span></div>
+  <div class="voet">Je voortgang wordt alleen op dit apparaat bewaard${opslagOk ? "" : " (lukt nu niet: open Oya via de directe link)"}. ${Q.length} vragen.</div>`;
+  app.innerHTML = h;
+  document.getElementById("info").onclick = () => { infoOpen = !infoOpen; teken(); };
+  document.getElementById("mix").onclick = () => start(0, 0);
+  document.getElementById("inst").onclick = () => { view = "inst"; teken(); };
+  document.getElementById("klasknop").onclick = () => { view = "klaskies"; teken(); };
+  app.querySelectorAll(".halte").forEach(b => b.onclick = () => start(Number(b.dataset.w), 0));
+}
+
+function instellingen() {
+  const i = S.inst; const opts = i.modus === "aantal" ? AANTAL : MINUTEN; const cur = i.modus === "aantal" ? i.aantal : i.min;
+  app.innerHTML = `<div class="kop"><h2 style="flex:1">Instellingen</h2><button class="x" id="sluit" aria-label="Terug">×</button></div>
+  <div class="kaart"><div class="instkop">Sessielengte</div><div class="small muted">Stop een sessie na</div>
+    <div class="seg"><button id="m1" aria-pressed="${i.modus === "aantal"}">Aantal vragen</button><button id="m2" aria-pressed="${i.modus === "tijd"}">Tijd</button></div>
+    <div class="seg">${opts.map(v => `<button class="lv" data-v="${v}" aria-pressed="${v === cur}">${v}${i.modus === "aantal" ? "" : " min"}</button>`).join("")}</div>
+    <div class="small muted">${i.modus === "tijd" ? "Als de tijd om is, maak je de vraag af waar je mee bezig bent." : "Na elke sessie kun je nog een ronde of een langere ronde doen."}</div></div>
+  <div class="kaart"><div class="instkop">Weekdoel</div><div class="small muted">Hoe vaak wil je oefenen?</div>
+    <div class="seg">${DOELEN.map(d => `<button class="dv" data-d="${d.n}" aria-pressed="${d.n === weekdoel()}">${d.t}</button>`).join("")}</div>
+    <div class="small muted">Deze week geoefend: <b>${dagenDezeWeek()}</b> ${dagenDezeWeek() === 1 ? "dag" : "dagen"}. Een dag telt als je minstens één vraag beantwoordt. De week begint op maandag.</div></div>
+  <button class="btn btn-primair" id="klaar">Klaar</button>`;
+  document.getElementById("sluit").onclick = document.getElementById("klaar").onclick = () => { view = "thuis"; teken(); };
+  document.getElementById("m1").onclick = () => { i.modus = "aantal"; bewaar(); teken(); };
+  document.getElementById("m2").onclick = () => { i.modus = "tijd"; bewaar(); teken(); };
+  app.querySelectorAll(".dv").forEach(b => b.onclick = () => { i.doel = Number(b.dataset.d); bewaar(); teken(); });
+  app.querySelectorAll(".lv").forEach(b => b.onclick = () => { const v = Number(b.dataset.v); if (i.modus === "aantal") i.aantal = v; else i.min = v; bewaar(); teken(); });
+}
+
+function start(week, extra) {
+  const i = S.inst; const rij = wachtrij(week);
+  sessie = { week, extra, rij: i.modus === "aantal" ? rij.slice(0, i.aantal + extra) : rij, i: 0, beantwoord: 0, goed: 0, mis: [],
+    modus: i.modus, eind: i.modus === "tijd" ? Date.now() + (i.min + extra) * 60000 : null, op: false, elektraGetoond: false };
+  view = "sessie"; if (tik) clearInterval(tik); if (sessie.eind) tik = setInterval(tijd, 500); teken();
+}
+function pct() { if (sessie.modus === "aantal") return 100 * sessie.i / sessie.rij.length;
+  const tot = (S.inst.min + sessie.extra) * 60000; return Math.min(100, 100 * (1 - Math.max(0, sessie.eind - Date.now()) / tot)); }
+function tijd() { if (!sessie || view !== "sessie") return; const b = document.getElementById("pb"); if (b) b.style.width = pct() + "%";
+  if (!sessie.op && Date.now() >= sessie.eind) { sessie.op = true; const n = document.getElementById("tn"); if (n) n.textContent = "Tijd om: maak deze af."; } }
+
+function vraagKop(q) {
+  const w = WEKEN.find(x => x.n === q.w);
+  return `<div class="chips"><span class="chip">Week ${w.n} · ${esc(w.naam)}</span><span class="chip">${SOORT[q.s]}${q.t === "twee" ? " · in twee stappen" : ""}</span></div>
+    <div class="vraag">${esc(q.q)}</div>${q.fig ? `<div class="fig">${q.fig}</div>` : ""}`;
+}
+
+function sessieView() {
+  const q = sessie.rij[sessie.i];
+  const teller = sessie.modus === "aantal" ? `${sessie.i + 1} / ${sessie.rij.length}` : `<span id="tn">${sessie.op ? "Tijd om: maak deze af." : ""}</span>`;
+  app.innerHTML = `<div class="kop"><button class="x" id="stop" aria-label="Sessie stoppen">×</button><div class="balk"><div id="pb" style="width:${pct()}%"></div></div>
+    <span class="small muted" style="min-width:3.5em;text-align:right">${teller}</span></div>
+  <div class="vkaart">${vraagKop(q)}<div id="antw"></div></div><div id="fb"></div>`;
+  document.getElementById("stop").onclick = einde;
+  if (q.t === "koppel") koppel(q); else if (q.t === "twee") twee(q); else mc(q);
+}
+
+function optiesHtml(order, cls) { return `<div class="opties">${order.map((o, k) => `<button class="opt ${cls||""}" data-k="${k}"><span class="lt">${LT[k]}</span><span>${esc(o.t)}</span></button>`).join("")}</div>`; }
+function mc(q) {
+  const order = schud(q.o.map((t, idx) => ({ t, idx }))); const box = document.getElementById("antw");
+  box.innerHTML = optiesHtml(order);
+  box.querySelectorAll(".opt").forEach(b => b.onclick = () => {
+    const keuze = order[Number(b.dataset.k)]; const ok = keuze.idx === 0;
+    box.querySelectorAll(".opt").forEach((x, k) => { x.disabled = true; if (order[k].idx === 0) x.classList.add("goed"); });
+    if (!ok) b.classList.add("fout"); klaar(q, ok);
+  });
+}
+function twee(q) {
+  const o1 = schud(q.o.map((t, idx) => ({ t, idx }))); const o2 = schud(q.r.map((t, idx) => ({ t, idx })));
+  const box = document.getElementById("antw"); box.innerHTML = optiesHtml(o1) + `<div id="t2"></div>`;
+  const b1 = box.querySelectorAll(".opties")[0].querySelectorAll(".opt");
+  b1.forEach(b => b.onclick = () => {
+    const k1 = o1[Number(b.dataset.k)]; b1.forEach(x => x.disabled = true); b.classList.add("gekozen");
+    const t2 = document.getElementById("t2");
+    t2.innerHTML = `<div class="trap2"><div class="lbl">Stap 2 · Waarom?</div>${optiesHtml(o2)}</div>`;
+    const b2 = t2.querySelectorAll(".opt");
+    b2.forEach(c => c.onclick = () => {
+      const k2 = o2[Number(c.dataset.k)]; const ok = k1.idx === 0 && k2.idx === 0;
+      b1.forEach((x, k) => { x.classList.remove("gekozen"); if (o1[k].idx === 0) x.classList.add("goed"); });
+      if (k1.idx !== 0) b.classList.add("fout");
+      b2.forEach((x, k) => { x.disabled = true; if (o2[k].idx === 0) x.classList.add("goed"); });
+      if (k2.idx !== 0) c.classList.add("fout");
+      const deels = !ok && (k1.idx === 0 || k2.idx === 0) ? (k1.idx === 0 ? "Je antwoord klopt, maar de reden niet." : "Je reden klopt, maar je antwoord niet.") : "";
+      klaar(q, ok, deels);
+      t2.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    });
+    t2.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  });
+}
+function koppel(q) {
+  const L = q.pairs.map((p, i) => ({ t: p[0], i })); const R = schud(q.pairs.map((p, i) => ({ t: p[1], i })));
+  let sel = null, fouten = 0, klaarN = 0; const box = document.getElementById("antw");
+  box.innerHTML = `<div class="small muted">Tik links een begrip en daarna rechts wat erbij hoort.</div>
+  <div class="koppel"><div class="kol">${L.map(l => `<button class="kitem" data-z="L" data-i="${l.i}">${esc(l.t)}</button>`).join("")}</div>
+  <div class="kol">${R.map(r => `<button class="kitem" data-z="R" data-i="${r.i}">${esc(r.t)}</button>`).join("")}</div></div>`;
+  box.querySelectorAll(".kitem").forEach(b => b.onclick = () => {
+    if (b.classList.contains("klaar")) return;
+    if (!sel || sel.dataset.z === b.dataset.z) { if (sel) sel.classList.remove("sel"); sel = b; b.classList.add("sel"); return; }
+    const a = sel; sel = null; a.classList.remove("sel");
+    if (a.dataset.i === b.dataset.i) { a.classList.add("klaar"); b.classList.add("klaar"); a.disabled = b.disabled = true; klaarN++;
+      if (klaarN === q.pairs.length) klaar(q, fouten === 0, fouten ? `Klaar, met ${fouten} misser${fouten === 1 ? "" : "s"}.` : "");
+    } else { fouten++; [a, b].forEach(x => { x.classList.add("mis"); setTimeout(() => x.classList.remove("mis"), 450); }); }
+  });
+}
+
+function klaar(q, ok, extra) {
+  sessie.beantwoord++; if (ok) sessie.goed++; else sessie.mis.push(q.id); scoor(q, ok);
+  const laatste = sessie.modus === "aantal" ? sessie.i + 1 >= sessie.rij.length : (sessie.op || Date.now() >= sessie.eind || sessie.i + 1 >= sessie.rij.length);
+  let elektra = "";
+  if (!ok && q.elektra && !sessie.elektraGetoond) { sessie.elektraGetoond = true;
+    elektra = `<div class="elektra">Wil je hier meer over weten? Vraag het Elektra, je coach:<br><i>“${esc(q.elektra)}”</i><br><button id="kopie">Kopieer vraag</button></div>`; }
+  const fb = document.getElementById("fb");
+  fb.innerHTML = `<div class="terug"><h3>${ok ? "✓ Goed" : "✗ Nog niet"}</h3>${extra ? `<div><b>${esc(extra)}</b></div>` : ""}
+    <div><b>Uitleg.</b> ${esc(q.why)}</div>
+    ${q.mis ? `<div class="noot"><b>Leerlingdenkbeeld.</b> ${esc(q.mis)}</div>` : ""}
+    ${q.par ? `<div class="boek">Lees nog eens: Cutnell &amp; Johnson § ${esc(q.par)}</div>` : ""}
+    ${elektra}
+    <button class="btn btn-primair" id="verder">${laatste ? "Naar je resultaat" : "Verder"}</button></div>`;
+  const k = document.getElementById("kopie");
+  if (k) k.onclick = () => { try { navigator.clipboard.writeText(q.elektra).then(() => k.textContent = "Gekopieerd"); } catch (e) { k.textContent = "Kopiëren lukt niet; neem de vraag over"; } };
+  const v = document.getElementById("verder"); v.focus({ preventScroll: true });
+  fb.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  v.onclick = () => { if (laatste) einde(); else { sessie.i++; teken(); } };
+}
+function einde() {
+  if (tik) { clearInterval(tik); tik = null; }
+  if (sessie.beantwoord > 0) { S.dagen[vandaag()] = (S.dagen[vandaag()] || 0) + 1;
+    S.sessies.push({ dag: vandaag(), week: sessie.week, n: sessie.beantwoord, goed: sessie.goed, mis: sessie.mis });
+    if (S.sessies.length > 200) S.sessies = S.sessies.slice(-200); bewaar(); }
+  view = "eind"; teken();
+}
+function eindView() {
+  const s = sessie; const langer = S.inst.modus === "aantal" ? 5 : 2; const dw = dagenDezeWeek(), wd = weekdoel();
+  const gemist = s.mis.map(id => Q.find(q => q.id === id)).filter(Boolean);
+  const w = s.week ? WEKEN.find(x => x.n === s.week) : null;
+  app.innerHTML = `<div class="kaart"><div class="small muted">${w ? "Week " + w.n + " · " + esc(w.naam) : "Alle weken"}</div>
+    <div class="groot">${s.goed}<span class="muted" style="font-size:1.4rem"> / ${s.beantwoord}</span></div>
+    <div>${s.beantwoord ? (s.goed === s.beantwoord ? "Alles goed." : "Wat je mist, komt binnenkort terug.") : "Geen vragen beantwoord; deze telt niet mee voor je weekdoel."}</div>
+    <div class="small">Weekdoel: <b>${Math.min(dw, wd)}/${wd}</b> dagen${dw >= wd ? " — gehaald ✓" : ""}</div></div>
+  ${gemist.length ? `<div class="kaart"><div class="small muted">Nog eens bekijken</div>${gemist.map(q => `<div>${esc(q.q)}</div>`).join("")}</div>` : ""}
+  <button class="btn btn-primair" id="nog">Nog een ronde · ${lengte()}</button>
+  <div class="rij"><button class="btn btn-stil" id="langer">Langere ronde · ${lengte(langer)}</button><button class="btn btn-stil" id="home">Terug naar overzicht</button></div>`;
+  document.getElementById("nog").onclick = () => start(s.week, 0);
+  document.getElementById("langer").onclick = () => start(s.week, langer);
+  document.getElementById("home").onclick = () => { view = "thuis"; teken(); };
+}
+
+/* ================================================================== */
+/* KLASMODUS                                                            */
+/* ================================================================== */
+function klasKies() {
+  app.innerHTML = `<div class="kop"><h2 style="flex:1">Klasmodus</h2><button class="x" id="sluit" aria-label="Terug">×</button></div>
+  <div class="kaart"><div>Eén vraag tegelijk, groot in beeld. Laat studenten stemmen (hand of kaartje A–D), in tweetallen bespreken en opnieuw stemmen. Daarna toon je het antwoord met uitleg. Er wordt niets opgeslagen.</div>
+  <div class="small muted">Bladeren kan ook met de pijltjestoetsen of een presenter.</div></div>
+  ${WEKEN.map(w => { const n = Q.filter(q => q.w === w.n && q.t !== "koppel").length;
+    return `<button class="btn ${n ? "btn-stil" : "btn-stil"}" data-w="${w.n}" ${n ? "" : "disabled"} style="text-align:left">Week ${w.n} · ${esc(w.naam)} <span class="muted small">(${n ? n + " vragen" : "volgt nog"})</span></button>`; }).join("")}`;
+  document.getElementById("sluit").onclick = () => { view = "thuis"; teken(); };
+  app.querySelectorAll("[data-w]").forEach(b => b.onclick = () => {
+    const w = Number(b.dataset.w); const rij = Q.filter(q => q.w === w && q.t !== "koppel");
+    klas = { w, rij: rij.map(q => ({ q, o1: schud(q.o.map((t, idx) => ({ t, idx }))), o2: q.r ? schud(q.r.map((t, idx) => ({ t, idx }))) : null })), i: 0, stap: 0 };
+    view = "klas"; teken();
+  });
+}
+function klasView() {
+  document.body.classList.add("klas");
+  const it = klas.rij[klas.i]; const q = it.q; const toon = klas.stap === 2;
+  const lijst = (arr, letters, trap) => `<div class="opties">${arr.map((o, k) => `<button class="opt ${toon ? "toon" : ""} ${toon && o.idx === 0 ? "goed" : ""} ${it["k" + trap] === k ? "kk" : ""}" data-trap="${trap}" data-k="${k}" aria-pressed="${it["k" + trap] === k}"><span class="lt">${letters[k]}</span><span>${esc(o.t)}</span></button>`).join("")}</div>`;
+  app.innerHTML = `<div class="kop"><button class="x" id="sluit" aria-label="Klasmodus sluiten">×</button>
+    <div class="balk"><div style="width:${100 * (klas.i + 1) / klas.rij.length}%"></div></div><span class="small muted">${klas.i + 1} / ${klas.rij.length}</span></div>
+  <div class="vkaart">${vraagKop(q)}
+    ${it.o2 ? `<div class="kolommen"><div><div class="small muted">Antwoord</div>${lijst(it.o1, LT, 1)}</div><div><div class="small muted">Reden</div>${lijst(it.o2, "123456", 2)}</div></div>` : lijst(it.o1, LT, 1)}
+  </div>
+  ${klas.stap === 1 ? `<div class="herstem">Bespreek je keuze met je buur, en stem dan opnieuw.</div>` : ""}
+  ${toon ? `<div class="terug"><h3>Uitleg</h3><div>${esc(q.why)}</div>${q.mis ? `<div class="noot"><b>Leerlingdenkbeeld.</b> ${esc(q.mis)}</div>` : ""}${q.par ? `<div class="boek">Cutnell &amp; Johnson § ${esc(q.par)}</div>` : ""}</div>` : ""}
+  <div class="klasbalk"><button class="btn btn-stil" id="vorige" ${klas.i === 0 && klas.stap === 0 ? "disabled" : ""}>‹ Vorige</button>
+    ${klas.stap === 0 ? `<button class="btn btn-stil" id="herstem">Bespreek en stem opnieuw</button>` : ""}
+    ${klas.stap < 2 ? `<button class="btn btn-primair" id="toon">Toon antwoord en uitleg</button>` : `<button class="btn btn-primair" id="volgende" ${klas.i + 1 >= klas.rij.length ? "disabled" : ""}>Volgende vraag ›</button>`}</div>`;
+  document.getElementById("sluit").onclick = () => { view = "thuis"; teken(); };
+  const h = document.getElementById("herstem"); if (h) h.onclick = () => { klas.stap = 1; teken(); };
+  const t = document.getElementById("toon"); if (t) t.onclick = () => { klas.stap = 2; teken(); };
+  const v = document.getElementById("volgende"); if (v) v.onclick = () => klasStap(1);
+  document.getElementById("vorige").onclick = () => klasStap(-1);
+  app.querySelectorAll("button.opt[data-trap]").forEach(b => b.onclick = () => {
+    const key = "k" + b.dataset.trap, k = Number(b.dataset.k);
+    it[key] = it[key] === k ? null : k; teken();
+  });
+}
+function klasStap(d) {
+  if (d > 0) { if (klas.stap < 2) klas.stap++; else if (klas.i + 1 < klas.rij.length) { klas.i++; klas.stap = 0; } }
+  else { if (klas.stap > 0) klas.stap--; else if (klas.i > 0) { klas.i--; klas.stap = 2; } }
+  teken();
+}
+document.addEventListener("keydown", e => {
+  if (view !== "klas") return;
+  if (["ArrowRight", "PageDown", " "].includes(e.key)) { e.preventDefault(); klasStap(1); }
+  if (["ArrowLeft", "PageUp"].includes(e.key)) { e.preventDefault(); klasStap(-1); }
+});
+
+function teken() {
+  if (view !== "klas") document.body.classList.remove("klas");
+  if (view === "thuis") thuis(); else if (view === "inst") instellingen(); else if (view === "sessie") sessieView();
+  else if (view === "eind") eindView(); else if (view === "klaskies") klasKies(); else if (view === "klas") klasView();
+  window.scrollTo(0, 0);
+}
+/* Directe link naar een week: ...#week=1 start meteen een sessie; #klas opent de klasmodus. */
+(function () {
+  const m = location.hash.match(/week=(\d+)/);
+  if (m && Q.some(q => q.w === Number(m[1]))) { start(Number(m[1]), 0); return; }
+  if (location.hash === "#klas") view = "klaskies";
+  teken();
+})();
+</script>
+</body>
+</html>
